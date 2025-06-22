@@ -1,0 +1,76 @@
+<!DOCTYPE html> 
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>VR Сцена без тексту</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-msdf-text-component/dist/aframe-msdf-text-component.min.js"></script>
+  </head>
+
+  <body>
+    <a-scene>
+      <!-- Камера -->
+      <a-entity camera look-controls position="0 1.6 0"></a-entity>
+
+      <!-- Ресурси -->
+      <a-assets>
+        <img id="texture1" src="../images/eepy.png" />
+        <img id="texture2" src="../images/eepy1.png" />
+        <img id="texture3" src="../images/eepy2.png" />
+        <a-asset-item id="catModel" src="../models/oiiaioooooiai_cat.glb"></a-asset-item>
+        <a-asset-item id="font" src="../fonts/volja-regular_w-msdf.json"></a-asset-item>
+      </a-assets>
+
+      <!-- Небо з анімацією кольору -->
+      <a-sky 
+        color="#87CEEB" 
+        animation="property: color; from: #87CEEB; to: #8A2BE2; dur: 10000; dir: alternate; loop: true">
+      </a-sky>
+
+      <!-- Піраміда -->
+      <a-tetrahedron
+        position="-2 0 -5"
+        radius="1.2"
+        src="#texture1"
+        animation__color="property: material.color; from: #FFD700; to: #00FF00; dur: 10000; loop: true"
+        animation__rotate="property: rotation; to: 0 360 0; loop: true; dur: 8000">
+      </a-tetrahedron>
+
+      <!-- Циліндр на піраміді -->
+      <a-cylinder 
+        src="#texture2"
+        height="1"
+        radius="1"
+        position="-2 2 -5"
+        rotation="180 0 180"
+        animation="property: scale; dir: alternate; dur: 1500; loop: true; to: 1.5 2 1.5">
+      </a-cylinder>
+
+      <!-- Обертовий торус-вузол -->
+      <a-torus-knot 
+        src="#texture3"
+        radius="1.2"
+        position="-5 1 -5"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+      </a-torus-knot>
+
+      <!-- Кіт -->
+      <a-entity gltf-model="#catModel"
+          position="2 0 -6"
+          scale="6 6 6"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 2000">
+      </a-entity>
+
+      <!-- Текст -->
+      <a-text 
+        value="Поросолова Юлія"
+        font="../fonts/volja-regular_w-msdf.json"
+        negate="false"
+        color="black"
+        width="10"
+        position="-0.5 3 -6"
+        animation="property: rotation; to: 0 0 360; loop: true; dur: 15000">
+      </a-text>
+    </a-scene>
+  </body>
+</html>
