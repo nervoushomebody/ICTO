@@ -1,1 +1,30 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>3D Сцена A-Frame</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-sky color="#87CEEB"></a-sky>
+
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="10" height="10" color="#7CFC00"></a-plane>
+
+      <a-torus 
+        position="-2 1 -5" 
+        radius="1" 
+        radius-tubular="0.2"
+        color="#228B22">
+      </a-torus>
+
+      <a-cylinder 
+        position="2 1 -5" 
+        height="2" 
+        radius="0.5" 
+        color="#FFD700">
+      </a-cylinder>
+    </a-scene>
+  </body>
+</html>
 
