@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Solar System AR</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+    <script src="cosmo.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs="sourceType: webcam;">
+      
+      <!-- AR-маркер -->
+      <a-marker type="pattern" url="pattern-cosmo.patt">
+        <!-- Сонце -->
+        <a-sphere src="#sun" radius="0.5" color="#fff"></a-sphere>
+
+        <!-- Меркурій -->
+        <a-entity planet="name: mercury; mass: 3.3e23; year: 88; dist: 57900000000"
+                  geometry="primitive: sphere; radius: 0.05"
+                  material="src: #mercury">
+        </a-entity>
+
+        <!-- Венера -->
+        <a-entity planet="name: venus; mass: 4.87e24; year: 225; dist: 108000000000"
+                  geometry="primitive: sphere; radius: 0.12"
+                  material="src: #venus">
+        </a-entity>
+
+        <!-- Земля -->
+        <a-entity planet="name: earth; mass: 5.97e24; year: 365; dist: 150000000000"
+                  geometry="primitive: sphere; radius: 0.13"
+                  material="src: #earth">
+        </a-entity>
+
+        <!-- Марс -->
+        <a-entity planet="name: mars; mass: 6.42e23; year: 687; dist: 228000000000"
+                  geometry="primitive: sphere; radius: 0.10"
+                  material="src: #mars">
+        </a-entity>
+
+        <!-- Юпітер -->
+        <a-entity planet="name: jupiter; mass: 1.90e27; year: 4333; dist: 778000000000"
+                  geometry="primitive: sphere; radius: 0.25"
+                  material="src: #jupiter">
+        </a-entity>
+
+        <!-- Сатурн -->
+        <a-entity planet="name: saturn; mass: 5.68e26; year: 10759; dist: 1434000000000"
+                  geometry="primitive: sphere; radius: 0.22"
+                  material="src: #saturn">
+        </a-entity>
+
+        <!-- Уран -->
+        <a-entity planet="name: uranus; mass: 8.68e25; year: 30687; dist: 2871000000000"
+                  geometry="primitive: sphere; radius: 0.18"
+                  material="src: #uranus">
+        </a-entity>
+
+        <!-- Нептун -->
+        <a-entity planet="name: neptune; mass: 1.02e26; year: 60190; dist: 4495000000000"
+                  geometry="primitive: sphere; radius: 0.17"
+                  material="src: #neptune">
+        </a-entity>
+      </a-marker>
+
+      <!-- Камера -->
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Текстури -->
+    <a-assets>
+      <img id="sun" src="sun.jpg">
+      <img id="mercury" src="mercury.jpg">
+      <img id="venus" src="venus.jpg">
+      <img id="earth" src="earth.jpg">
+      <img id="mars" src="mars.jpg">
+      <img id="jupiter" src="jupiter.jpg">
+      <img id="saturn" src="saturn.jpg">
+      <img id="uranus" src="uranus.jpg">
+      <img id="neptune" src="neptune.jpg">
+    </a-assets>
+  </body>
+</html>
