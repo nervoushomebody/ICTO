@@ -2,51 +2,73 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Комплекс пірамід Гізи</title>
+    <title>Комплекс пірамід Гізи в AR</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/3.3.2/aframe/build/aframe-ar.min.js"></script>
   </head>
-  <body>
-    <a-scene>
-      <!-- Ґрунтова площина -->
-      <a-plane position="0 0 0" rotation="-90 0 0" width="50" height="50" color="#7BC8A4"></a-plane>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs>
 
-      <!-- Піраміда Хеопса (1) -->
-      <a-entity position="-6 0 -6">
-        <!-- В роботі використовуємо масштаб, де 1 ≙ 100м.
-             Висота 1.45, тому піднімаємо на 0.725 -->
-        <a-cone 
-          geometry="primitive: cone; height: 1.45; radiusBottom: 1.63; segmentsRadial: 4"
-          material="color: #FFC65D"
-          position="0 0.725 0">
-        </a-cone>
-      </a-entity>
+      <!-- Прив'язка до твого маркера -->
+      <a-marker type="pattern" url="pattern-Gizeh.patt">
 
-      <!-- Піраміда Хефрена (2) – центральна, розташована за координатами 0 0 0 -->
-      <a-entity position="0 0 0">
-        <!-- Висота 1.35, тому позиціюємо на 0.675 -->
-        <a-cone 
-          geometry="primitive: cone; height: 1.35; radiusBottom: 1.48; segmentsRadial: 4"
-          material="color: #FF6666"
-          position="0 0.675 0">
-        </a-cone>
-      </a-entity>
+        <!-- Площа -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
 
-      <!-- Піраміда Мікеріна (3) -->
-      <a-entity position="6 0 6">
-        <!-- Висота 0.65, тому зміщуємо на 0.325 -->
-        <a-cone 
-          geometry="primitive: cone; height: 0.65; radiusBottom: 0.71; segmentsRadial: 4"
-          material="color: #66FF66"
-          position="0 0.325 0">
-        </a-cone>
-      </a-entity>
+        <!-- Піраміда Хеопса -->
+        <a-entity position="-3 0 -3">
+          <a-cone 
+            geometry="primitive: cone; height: 1.45; radiusBottom: 1.63; segmentsRadial: 4"
+            material="src: brick_bump.jpg"
+            position="0 0.725 0">
+          </a-cone>
+          <a-cone 
+            geometry="primitive: cone; height: 0.1; radiusBottom: 0.2; segmentsRadial: 4"
+            material="color: gold"
+            position="0 1.45 0">
+          </a-cone>
+        </a-entity>
 
-      <!-- Камера з анімацією, що рухається від (0,20,25) до (0,5,5) -->
-      <a-entity id="cameraRig"
-                position="0 20 25"
-                animation="property: position; to: 0 5 5; dur: 6000; easing: easeInOutQuad; loop: true">
-        <a-camera wasd-controls-enabled="false"></a-camera>
-      </a-entity>
+        <!-- Піраміда Хефрена -->
+        <a-entity position="0 0 0">
+          <a-cone 
+            geometry="primitive: cone; height: 1.35; radiusBottom: 1.48; segmentsRadial: 4"
+            material="src: brick_diffuse.jpg"
+            position="0 0.675 0">
+          </a-cone>
+          <a-cone 
+            geometry="primitive: cone; height: 0.1; radiusBottom: 0.18; segmentsRadial: 4"
+            material="color: gold"
+            position="0 1.35 0">
+          </a-cone>
+        </a-entity>
+
+        <!-- Піраміда Мікеріна -->
+        <a-entity position="3 0 3">
+          <a-cone 
+            geometry="primitive: cone; height: 0.65; radiusBottom: 0.71; segmentsRadial: 4"
+            material="src: brick_roughness.jpg"
+            position="0 0.325 0">
+          </a-cone>
+          <a-cone 
+            geometry="primitive: cone; height: 0.05; radiusBottom: 0.09; segmentsRadial: 4"
+            material="color: gold"
+            position="0 0.65 0">
+          </a-cone>
+        </a-entity>
+
+        <!-- Камера з анімацією -->
+        <a-entity id="cameraRig"
+                  position="0 2 6"
+                  animation="property: position; to: 0 1.5 1.5; dur: 6000; easing: easeInOutQuad; loop: true">
+          <a-camera></a-camera>
+        </a-entity>
+
+      </a-marker>
+
+      <!-- AR-камера -->
+      <a-entity camera></a-entity>
+
     </a-scene>
   </body>
 </html>
