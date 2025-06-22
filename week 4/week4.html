@@ -1,1 +1,92 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AR — Три маркери: Hiro, Kanji, Власний</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+      .arjs-loader {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .arjs-loader div {
+        text-align: center;
+        font-size: 1.25em;
+        color: white;
+      }
+    </style>
+  </head>
+  <body style="margin: 0; overflow: hidden">
+    <div class="arjs-loader">
+      <div>Завантаження AR-сцени...</div>
+    </div>
+
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      renderer="logarithmicDepthBuffer: true;"
+      vr-mode-ui="enabled: false"
+    >
+      <!-- Дуже великий кіт на Hiro -->
+      <a-marker preset="hiro">
+        <a-entity
+          gltf-model="../models/oiiaioooooiai_cat.glb"
+          scale="1.8 1.8 1.8"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 4000"
+          position="0 0 0"
+        ></a-entity>
+      </a-marker>
+
+      <!-- Маленький кіт на Kanji -->
+      <a-marker preset="kanji">
+        <a-entity
+          gltf-model="../models/cat_box_meme.glb"
+          scale="0.3 0.3 0.3"
+          animation="property: rotation; to: 0 -360 0; loop: true; dur: 6000"
+          position="0 0 0"
+        ></a-entity>
+      </a-marker>
+
+      <!-- Власний маркер з конусом -->
+      <a-marker type="pattern" url="week 3/pattern-week4.patt">
+        <a-cone
+          position="0 0.5 0"
+          radius-bottom="0.5"
+          radius-top="0"
+          height="1"
+          color="#FFC107"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"
+        ></a-cone>
+      </a-marker>
+
+      <!-- Камера -->
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const scene = document.querySelector("a-scene");
+        const loader = document.querySelector(".arjs-loader");
+
+        if (scene.hasLoaded) {
+          loader.style.display = "none";
+        } else {
+          scene.addEventListener("loaded", function () {
+            loader.style.display = "none";
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
 
