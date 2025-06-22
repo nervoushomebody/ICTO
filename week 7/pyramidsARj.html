@@ -2,64 +2,64 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR Піраміди Гізи з власним маркером</title>
+    <title>AR Піраміди Гізи (без маркерів)</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.min.js"></script>
     <style>
       body, html { margin: 0; overflow: hidden; width: 100%; height: 100%; }
     </style>
   </head>
   <body>
-    <a-scene embedded arjs='sourceType: webcam;' vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true;">
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; trackingMethod: best;"
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true;">
       
-      <!-- Власний маркер -->
-      <a-marker type="pattern" url="week7/pattern-Gizeh.patt">
-        <!-- Піраміда Хеопса -->
-        <a-entity position="-1 0 -1">
-          <a-cone 
-            height="1.45" radius-bottom="1.63" segments-radial="4"
-            material="color: #c2b280"
-            position="0 0.725 0">
-          </a-cone>
-          <a-cone
-            height="0.1" radius-bottom="0.2" segments-radial="4"
-            material="color: gold"
-            position="0 1.45 0">
-          </a-cone>
-        </a-entity>
+      <!-- Піраміда Хеопса -->
+      <a-entity position="-1 0 -1">
+        <a-cone 
+          height="1.45" radius-bottom="1.63" segments-radial="4"
+          material="color: #c2b280"
+          position="0 0.725 0">
+        </a-cone>
+        <a-cone
+          height="0.1" radius-bottom="0.2" segments-radial="4"
+          material="color: gold"
+          position="0 1.45 0">
+        </a-cone>
+      </a-entity>
 
-        <!-- Піраміда Хефрена -->
-        <a-entity position="0 0 0">
-          <a-cone 
-            height="1.35" radius-bottom="1.48" segments-radial="4"
-            material="color: #bba37e"
-            position="0 0.675 0">
-          </a-cone>
-          <a-cone
-            height="0.1" radius-bottom="0.18" segments-radial="4"
-            material="color: gold"
-            position="0 1.35 0">
-          </a-cone>
-        </a-entity>
+      <!-- Піраміда Хефрена -->
+      <a-entity position="0 0 0">
+        <a-cone 
+          height="1.35" radius-bottom="1.48" segments-radial="4"
+          material="color: #bba37e"
+          position="0 0.675 0">
+        </a-cone>
+        <a-cone
+          height="0.1" radius-bottom="0.18" segments-radial="4"
+          material="color: gold"
+          position="0 1.35 0">
+        </a-cone>
+      </a-entity>
 
-        <!-- Піраміда Мікеріна -->
-        <a-entity position="1 0 1">
-          <a-cone 
-            height="0.65" radius-bottom="0.71" segments-radial="4"
-            material="color: #aa9166"
-            position="0 0.325 0">
-          </a-cone>
-          <a-cone
-            height="0.05" radius-bottom="0.09" segments-radial="4"
-            material="color: gold"
-            position="0 0.65 0">
-          </a-cone>
-        </a-entity>
-      </a-marker>
+      <!-- Піраміда Мікеріна -->
+      <a-entity position="1 0 1">
+        <a-cone 
+          height="0.65" radius-bottom="0.71" segments-radial="4"
+          material="color: #aa9166"
+          position="0 0.325 0">
+        </a-cone>
+        <a-cone
+          height="0.05" radius-bottom="0.09" segments-radial="4"
+          material="color: gold"
+          position="0 0.65 0">
+        </a-cone>
+      </a-entity>
 
       <!-- Камера -->
       <a-entity camera></a-entity>
     </a-scene>
   </body>
 </html>
-
