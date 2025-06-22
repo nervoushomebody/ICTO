@@ -51,22 +51,23 @@
       <a-marker preset="kanji">
         <a-entity
           gltf-model="../models/cat_box_meme.glb"
-          scale="0.3 0.3 0.3"
+          scale="0.05 0.05 0.05"
           animation="property: rotation; to: 0 -360 0; loop: true; dur: 6000"
           position="0 0 0"
         ></a-entity>
       </a-marker>
 
-      <!-- Власний маркер з конусом -->
+      <!-- Власний маркер з кубом -->
       <a-marker type="pattern" url="./pattern-week4.patt">
-        <a-cone
+        <a-box
           position="0 0.5 0"
-          radius-bottom="0.5"
-          radius-top="0"
+          depth="1"
           height="1"
-          color="#FFC107"
+          width="1"
+          color="#FF0000"
           animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"
-        ></a-cone>
+          animation__color="property: material.color; from: #FF0000; to: #00FFFF; dur: 2000; dir: alternate; loop: true"
+        ></a-box>
       </a-marker>
 
       <!-- Камера -->
@@ -89,4 +90,3 @@
     </script>
   </body>
 </html>
-
