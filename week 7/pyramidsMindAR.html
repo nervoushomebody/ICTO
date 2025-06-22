@@ -1,1 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>MindAR AR - Піраміди Гізи</title>
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.7/dist/aframe/mindar-aframe.prod.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+      canvas { position: absolute; top: 0; left: 0; }
+    </style>
+  </head>
+
+  <body>
+    <a-scene
+      mindar-image="imageTargetSrc: targets/targets.mind;"
+      embedded
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: true"
+    >
+      <a-assets>
+        <!-- Текстури можна додати тут -->
+      </a-assets>
+
+      <!-- Камера -->
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Сцена з пірамідами при розпізнаванні -->
+      <a-entity mindar-image-target="targetIndex: 0">
+
+        <!-- Піраміда Хеопса -->
+        <a-entity position="-1 0 -1">
+          <a-cone height="1.45" radius-bottom="1.63" segments-radial="4"
+                  material="color: #c2b280"
+                  position="0 0.725 0"></a-cone>
+          <a-cone height="0.1" radius-bottom="0.2" segments-radial="4"
+                  material="color: gold"
+                  position="0 1.45 0"></a-cone>
+        </a-entity>
+
+        <!-- Піраміда Хефрена -->
+        <a-entity position="0 0 0">
+          <a-cone height="1.35" radius-bottom="1.48" segments-radial="4"
+                  material="color: #bba37e"
+                  position="0 0.675 0"></a-cone>
+          <a-cone height="0.1" radius-bottom="0.18" segments-radial="4"
+                  material="color: gold"
+                  position="0 1.35 0"></a-cone>
+        </a-entity>
+
+        <!-- Піраміда Мікеріна -->
+        <a-entity position="1 0 1">
+          <a-cone height="0.65" radius-bottom="0.71" segments-radial="4"
+                  material="color: #aa9166"
+                  position="0 0.325 0"></a-cone>
+          <a-cone height="0.05" radius-bottom="0.09" segments-radial="4"
+                  material="color: gold"
+                  position="0 0.65 0"></a-cone>
+        </a-entity>
+
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
 
