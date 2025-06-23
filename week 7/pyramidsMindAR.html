@@ -2,11 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>AR Піраміди Гізи MindAR</title>
+    <title>AR Піраміди Гізи (без маркерів, MindAR)</title>
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.7/dist/aframe/mindar-aframe.prod.js"></script>
     <style>
-      body { margin: 0; overflow: hidden; }
+      body { margin: 0; overflow: hidden; background: transparent; }
       canvas { position: absolute; top: 0; left: 0; }
     </style>
   </head>
@@ -15,10 +15,10 @@
     <a-scene
       embedded
       color-space="sRGB"
-      renderer="colorManagement: true, physicallyCorrectLights"
+      renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true;"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: true"
-      mindar-image="autoStart: false;"
+      mindar-image="autoStart: true;"
     >
       <!-- Завантаження текстур -->
       <a-assets>
