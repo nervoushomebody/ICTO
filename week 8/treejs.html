@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Giza Pyramid Complex - Three.js</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+		<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+		<script>
+			// Scene setup
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+			const renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			// Lighting
+			const ambientLight = new THREE.AmbientLight( 0x404040 ); // soft white light
+			scene.add( ambientLight );
+			const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+			directionalLight.position.set( 10, 10, 5 );
+			scene.add( directionalLight );
+
+			// Ground Plane
+			const planeGeometry = new THREE.PlaneGeometry( 50, 50 );
+			const planeMaterial = new THREE.MeshStandardMaterial( { color: 0x7BC8A4, side: THREE.DoubleSide } );
+			const plane = new THREE.Mesh( planeGeometry, planeMaterial );
+			plane.rotation.x = - Math.PI / 2;
+			scene.add( plane );
+
+			// Texture Loader
+			const textureLoader = new THREE.TextureLoader();
+			const brickBumpTexture = textureLoader.load('brick_bump.jpg');
+			const brickDiffuseTexture = textureLoader.load('brick_diffuse.jpg');
+			const brickRoughnessTexture = textureLoader.load('brick_roughness.jpg');
+
+			// Pyramid of Khufu
+			const khufuGroup = new THREE.Group();
+			khufuGroup.position.set(-6, 0, -6);
+			scene.add(khufuGroup);
+
+			const khufuPyramidGeometry = new THREE.ConeGeometry( 1.63, 1.45, 4 );
+			const khufuPyramidMaterial = new THREE.MeshStandardMaterial( { map: brickBumpTexture } );
+			const khufuPyramid = new THREE.Mesh( khufuPyramidGeometry, khufuPyramidMaterial );
+			khufuPyramid.position.y = 1.45 / 2;
+			khufuGroup.add( khufuPyramid );
+
+			const khufuTopGeometry = new THREE.ConeGeometry( 0.2, 0.1, 4 );
+			const khufuTopMaterial = new THREE.MeshStandardMaterial( { color: 'gold' } );
+			const khufuTop = new THREE.Mesh( khufuTopGeometry, khufuTopMaterial );
+			khufuTop.position.y = 1.45;
+			khufuGroup.add( khufuTop );
+
+			// Pyramid of Khafre
+			const khafreGroup = new THREE.Group();
+			scene.add(khafreGroup);
+
+			const khafrePyramidGeometry = new THREE.ConeGeometry( 1.48, 1.35, 4 );
+			const khafrePyramidMaterial = new THREE.MeshStandardMaterial( { map: brickDiffuseTexture } );
+			const khafrePyramid = new THREE.Mesh( khafrePyramidGeometry, khafrePyramidMaterial );
+			khafrePyramid.position.y = 1.35 / 2;
+			khafreGroup.add( khafrePyramid );
+
+			const khafreTopGeometry = new THREE.ConeGeometry( 0.18, 0.1, 4 );
+			const khafreTopMaterial = new THREE.MeshStandardMaterial( { color: 'gold' } );
+			const khafreTop = new THREE.Mesh( khafreTopGeometry, khafreTopMaterial );
+			khafreTop.position.y = 1.35;
+			khafreGroup.add( khafreTop );
+
+
+			// Pyramid of Menkaure
+			const menkaureGroup = new THREE.Group();
+			menkaureGroup.position.set(6, 0, 6);
+			scene.add(menkaureGroup);
+
+			const menkaurePyramidGeometry = new THREE.ConeGeometry( 0.71, 0.65, 4 );
+			const menkaurePyramidMaterial = new THREE.MeshStandardMaterial( { map: brickRoughnessTexture } );
+			const menkaurePyramid = new THREE.Mesh( menkaurePyramidGeometry, menkaurePyramidMaterial );
+			menkaurePyramid.position.y = 0.65 / 2;
+			menkaureGroup.add( menkaurePyramid );
+
+			const menkaureTopGeometry = new THREE.ConeGeometry( 0.09, 0.05, 4 );
+			const menkaureTopMaterial = new THREE.MeshStandardMaterial( { color: 'gold' } );
+			const menkaureTop = new THREE.Mesh( menkaureTopGeometry, menkaureTopMaterial );
+			menkaureTop.position.y = 0.65;
+			menkaureGroup.add( menkaureTop );
+
+			// Camera Animation
+			camera.position.set(0, 20, 25);
+			camera.lookAt(scene.position);
+
+			const clock = new THREE.Clock();
+			const animationDuration = 6; // seconds
+			const startPosition = new THREE.Vector3(0, 20, 25);
+			const endPosition = new THREE.Vector3(0, 5, 5);
+
+			function animate() {
+				requestAnimationFrame( animate );
+
+				const elapsedTime = clock.getElapsedTime();
+				const loopTime = elapsedTime % animationDuration;
+				const t = loopTime / animationDuration;
+
+                // easeInOutQuad
+				const easedT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+				const newPosition = new THREE.Vector3().lerpVectors(startPosition, endPosition, easedT);
+				camera.position.copy(newPosition);
+				camera.lookAt(scene.position);
+
+				renderer.render( scene, camera );
+			}
+			animate();
+
+			// Handle window resize
+			window.addEventListener('resize', () => {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(window.innerWidth, window.innerHeight);
+			});
+
+		</script>
+	</body>
+</html>
