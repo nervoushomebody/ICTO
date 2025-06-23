@@ -53,7 +53,7 @@
               var pyramidGroup = document.querySelector('#pyramidGroup');
               
               marker.addEventListener('markerFound', function() {
-                  console.log('Giza marker found');
+                  console.log('Marker found');
                   // Hide loader if it's still visible
                   var loader = document.querySelector('.arjs-loader');
                   if (loader) {
@@ -66,7 +66,7 @@
               });
               
               marker.addEventListener('markerLost', function() {
-                  console.log('Giza marker lost');
+                  console.log('Marker lost');
                   // Hide the pyramids
                   if (pyramidGroup) {
                       pyramidGroup.setAttribute('visible', 'false');
@@ -91,7 +91,7 @@
 
     <div class="arjs-loader">
         <div>Loading AR Scene...</div>
-        <div class="instruction">Point your camera at the Giza pattern marker to view the 3D model.</div>
+        <div class="instruction">Point your camera at the Hiro marker to view the 3D model.</div>
     </div>
 
     <a-scene
@@ -101,15 +101,14 @@
         arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
         
         <a-assets>
-            <img id="brick_bump" src="brick_bump.jpg" crossOrigin="anonymous">
-            <img id="brick_diffuse" src="brick_diffuse.jpg" crossOrigin="anonymous">
-            <img id="brick_roughness" src="brick_roughness.jpg" crossOrigin="anonymous">
+            <img id="brick_bump" src="brick_bump.jpg" crossorigin="anonymous">
+            <img id="brick_diffuse" src="brick_diffuse.jpg" crossorigin="anonymous">
+            <img id="brick_roughness" src="brick_roughness.jpg" crossorigin="anonymous">
         </a-assets>
 
         <a-marker
             marker-events
-            type="pattern"
-            url="week 7/pattern-Gizeh.patt"
+            preset="hiro"
             smooth="true"
             smoothCount="10"
             smoothTolerance="0.01"
