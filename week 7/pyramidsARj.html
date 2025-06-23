@@ -5,8 +5,9 @@
     <title>AR Pyramids of Giza</title>
     <meta name="description" content="AR scene with a 3D model of the Giza Pyramids">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.6/aframe/build/aframe-ar.js"></script>
+
     <style>
       .arjs-loader {
         height: 100%;
@@ -36,56 +37,15 @@
 </head>
 <body style="margin: 0px; overflow: hidden;">
     <script>
-      // Remove the loader after the scene has loaded to prevent it from sticking
+      // This script can be removed for simplicity or kept as is.
+      // It hides the loader automatically after a timeout.
       window.addEventListener('load', function() {
           setTimeout(function() {
               var loader = document.querySelector('.arjs-loader');
               if (loader) {
                   loader.style.display = 'none';
               }
-          }, 2500); // Wait 2.5 seconds
-      });
-
-      // A-Frame component to handle marker events
-      AFRAME.registerComponent('marker-events', {
-          init: function () {
-              var marker = this.el;
-              var pyramidGroup = document.querySelector('#pyramidGroup');
-              
-              marker.addEventListener('markerFound', function() {
-                  console.log('Marker found');
-                  // Hide loader if it's still visible
-                  var loader = document.querySelector('.arjs-loader');
-                  if (loader) {
-                      loader.style.display = 'none';
-                  }
-                  // Show the pyramids
-                  if (pyramidGroup) {
-                      pyramidGroup.setAttribute('visible', 'true');
-                  }
-              });
-              
-              marker.addEventListener('markerLost', function() {
-                  console.log('Marker lost');
-                  // Hide the pyramids
-                  if (pyramidGroup) {
-                      pyramidGroup.setAttribute('visible', 'false');
-                  }
-              });
-          }
-      });
-
-      // A-Frame component for a gentle rotation animation
-      AFRAME.registerComponent('gentle-rotation', {
-          init: function () {
-              this.el.setAttribute('animation', {
-                  property: 'rotation',
-                  to: '0 360 0',
-                  loop: true,
-                  dur: 40000, // Slower rotation
-                  easing: 'linear'
-              });
-          }
+          }, 3000);
       });
     </script>
 
@@ -98,65 +58,42 @@
         vr-mode-ui="enabled: false;"
         renderer="logarithmicDepthBuffer: true; antialias: true;"
         embedded
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
-        
+        arjs="sourceType: webcam; debugUIEnabled: false;">
+
         <a-assets>
             <img id="brick_bump" src="brick_bump.jpg" crossorigin="anonymous">
             <img id="brick_diffuse" src="brick_diffuse.jpg" crossorigin="anonymous">
             <img id="brick_roughness" src="brick_roughness.jpg" crossorigin="anonymous">
         </a-assets>
 
-        <a-marker
-            marker-events
-            preset="hiro"
-            smooth="true"
-            smoothCount="10"
-            smoothTolerance="0.01"
-            smoothThreshold="5">
-            
+        <a-marker preset="hiro" type="pattern">
+
             <a-entity
                 id="pyramidGroup"
-                visible="false"
-                gentle-rotation
-                position="0 0.5 0"
+                rotation="-90 0 0" position="0 0 -1"
                 scale="0.3 0.3 0.3">
-
-                <a-entity position="-1 0 -1">
-                    <a-cone
-                        geometry="primitive: cone; height: 1.45; radiusBottom: 1.63; segmentsRadial: 4"
-                        material="src: #brick_bump"
-                        position="0 0.725 0">
-                    </a-cone>
-                    <a-cone
-                        geometry="primitive: cone; height: 0.1; radiusBottom: 0.2; segmentsRadial: 4"
-                        material="color: gold"
-                        position="0 1.45 0">
-                    </a-cone>
-                </a-entity>
 
                 <a-entity position="0 0 0">
                     <a-cone
-                        geometry="primitive: cone; height: 1.35; radiusBottom: 1.48; segmentsRadial: 4"
-                        material="src: #brick_diffuse"
-                        position="0 0.675 0">
-                    </a-cone>
-                    <a-cone
-                        geometry="primitive: cone; height: 0.1; radiusBottom: 0.18; segmentsRadial: 4"
-                        material="color: gold"
-                        position="0 1.35 0">
+                        geometry="primitive: cone; height: 1.45; radiusBottom: 1.15; segmentsRadial: 4"
+                        material="src: #brick_diffuse;"
+                        rotation="0 0 0">
                     </a-cone>
                 </a-entity>
 
-                <a-entity position="1 0 1">
-                    <a-cone
-                        geometry="primitive: cone; height: 0.65; radiusBottom: 0.71; segmentsRadial: 4"
-                        material="src: #brick_roughness"
-                        position="0 0.325 0">
+                <a-entity position="-2.5 0 2">
+                     <a-cone
+                        geometry="primitive: cone; height: 1.35; radiusBottom: 1.05; segmentsRadial: 4"
+                        material="src: #brick_bump;"
+                        rotation="0 0 0">
                     </a-cone>
+                </a-entity>
+
+                <a-entity position="2.5 0 2.5">
                     <a-cone
-                        geometry="primitive: cone; height: 0.05; radiusBottom: 0.09; segmentsRadial: 4"
-                        material="color: gold"
-                        position="0 0.65 0">
+                        geometry="primitive: cone; height: 0.65; radiusBottom: 0.5; segmentsRadial: 4"
+                        material="src: #brick_roughness;"
+                        rotation="0 0 0">
                     </a-cone>
                 </a-entity>
             </a-entity>
