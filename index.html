@@ -1,22 +1,258 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Звіт про виконані завдання</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Звіт з інноваційно-цифрових технологій</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header h2 {
+            font-size: 1.3rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .assignment-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 4px solid #667eea;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .assignment-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .week-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .assignment-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .assignment-link {
+            display: inline-block;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 500;
+            padding: 10px 18px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+            transition: all 0.2s ease;
+        }
+
+        .assignment-link:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .special-assignment {
+            border-left-color: #ff6b6b;
+        }
+
+        .special-assignment .week-number {
+            background: #ff6b6b;
+        }
+
+        .special-assignment .assignment-link {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .special-assignment .assignment-link:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .lab-assignment {
+            border-left-color: #48dbfb;
+        }
+
+        .lab-assignment .week-number {
+            background: #48dbfb;
+        }
+
+        .lab-assignment .assignment-link {
+            border-color: #48dbfb;
+            color: #48dbfb;
+        }
+
+        .lab-assignment .assignment-link:hover {
+            background: #48dbfb;
+            color: white;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e9ecef;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .assignments-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Звіт про виконані завдання</h1>
-    <h2>Студентки групи Ім-24 Порослової Юлії</h2>
+    <div class="container">
+        <div class="header">
+            <h1>Звіт з інноваційно-цифрових технологій</h1>
+            <h2>Студентки групи Ім-24 Порослової Юлії</h2>
+        </div>
+        
+        <div class="content">
+            <div class="assignments-grid">
+                <div class="assignment-card">
+                    <div class="week-number">Тиждень 1</div>
+                    <a href="week 1/week1_figures_in_nature.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
 
-    <p><a href="week 1/week1_figures_in_nature.html" target="_blank">Домашнє завдання на тиждень 1</a></p>
-    <p><a href="week 2/week2_cat_figures.html" target="_blank">Домашнє завдання на тиждень 2</a></p>
-    <p><a href="week 3/mark.html" target="_blank">Домашнє завдання на тиждень 3</a></p>
-    <p><a href="week 4/week4.html" target="_blank">Домашнє завдання на тиждень 4</a></p>
-    <p><a href="week 5/cosmo.html" target="_blank">Домашнє завдання на тиждень 5</a></p>
-    <p><a href="week 7/pyramidsAR.html" target="_blank">Домашнє завдання на тиждень 7 (Лаб.1 AR)</a></p>
-    <p><a href="week 7/pyramidsARj.html" target="_blank">Домашнє завдання на тиждень 7 (Лаб.1 ARjs)</a></p>
-    <p><a href="week 7/pyramidsMindAR.html" target="_blank">Домашнє завдання на тиждень 7 (Лаб.1 MindAR)</a></p>
-    <p><a href="week 8/treejs.html" target="_blank">Домашнє завдання на тиждень 8 (Лаб.2 treejs)</a></p>
-    <p><a href="week 8/MindAR.html" target="_blank">Домашнє завдання на тиждень 8 (Лаб.2 MindAR)</a></p>
+                <div class="assignment-card">
+                    <div class="week-number">Тиждень 2</div>
+                    <a href="week 2/week2_cat_figures.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+
+                <div class="assignment-card special-assignment">
+                    <div class="week-number">Тиждень 3</div>
+                    <a href="week 3/mark.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+
+                <div class="assignment-card">
+                    <div class="week-number">Тиждень 4</div>
+                    <a href="week 4/week4.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+
+                <div class="assignment-card special-assignment">
+                    <div class="week-number">Тиждень 5</div>
+                    <a href="week 5/cosmo.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+
+                <div class="assignment-card lab-assignment">
+                    <div class="week-number">Тиждень 7</div>
+                    <div class="assignment-title">Лабораторна робота 1 - AR</div>
+                    <a href="week 7/pyramidsAR.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+
+                <div class="assignment-card lab-assignment">
+                    <div class="week-number">Тиждень 7</div>
+                    <div class="assignment-title">Лабораторна робота 1 - ARjs</div>
+                    <a href="week 7/pyramidsARj.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+
+                <div class="assignment-card lab-assignment">
+                    <div class="week-number">Тиждень 7</div>
+                    <div class="assignment-title">Лабораторна робота 1 - MindAR</div>
+                    <a href="week 7/pyramidsMindAR.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+
+                <div class="assignment-card lab-assignment">
+                    <div class="week-number">Тиждень 8</div>
+                    <div class="assignment-title">Лабораторна робота 2 - Three.js</div>
+                    <a href="week 8/treejs.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+
+                <div class="assignment-card lab-assignment">
+                    <div class="week-number">Тиждень 8</div>
+                    <div class="assignment-title">Лабораторна робота 2 - MindAR</div>
+                    <a href="week 8/MindAR.html" target="_blank" class="assignment-link">
+                        Переглянути завдання
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+        </div>
+    </div>
 </body>
 </html>
