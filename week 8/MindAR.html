@@ -1,135 +1,163 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
-    <title>Giza Pyramid Complex - MindAR</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+    <title>Giza Pyramid Complex - MindAR with Physics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
 
     <style>
-      body {
-        margin: 0;
-      }
-      .container {
-        width: 100vw;
-        height: 100vh;
-        position: relative;
-        overflow: hidden;
-      }
+        body { margin: 0; font-family: Arial, sans-serif; overflow: hidden; }
+        .ui-panel { position: absolute; color: white; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; z-index: 100; }
+        #info { top: 10px; left: 10px; }
+        #controls { top: 10px; right: 10px; }
+        #textures { bottom: 10px; left: 10px; width: calc(100% - 20px); box-sizing: border-box; }
+        #container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+        label { display: block; margin-bottom: 5px; }
     </style>
-  </head>
-  <body>
-    <div class="container"></div>
+</head>
+<body>
+    <div id="container">
+        <div id="info" class="ui-panel">
+            Marker needed!!!<br>
+            Auto-resets every 10 seconds.
+        </div>
+        <div id="controls" class="ui-panel">
+            <label><input type="checkbox" id="debugPhysics"> Show Physics Debug</label>
+        </div>
+        <div id="textures" class="ui-panel">
+            <label for="pyramid-texture">Pyramid Texture:</label>
+            <select id="pyramid-texture">
+                <option value="brick_diffuse.jpg" selected>Brick</option>
+                <option value="another_texture.jpg">Another Texture</option> </select>
+        </div>
+    </div>
 
     <script type="module">
-      document.addEventListener('DOMContentLoaded', async () => {
-        const container = document.querySelector(".container");
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.querySelector("#container");
 
-        // 1. Initialize MindARThree
-        const mindarThree = new MINDAR.MindARThree({
-          container: container,
-          imageTargetSrc: './targets.mind', // Path to your compiled image target
+            // 1. Initialize MindARThree
+            const mindarThree = new MINDAR.MindARThree({
+                container: container,
+                imageTargetSrc: './targets.mind', // Path to your compiled image target
+            });
+
+            const { renderer, scene, camera } = mindarThree;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            // 2. Create an anchor for the 3D content
+            const anchor = mindarThree.addAnchor(0);
+            const simulationGroup = new THREE.Group();
+            anchor.group.add(simulationGroup);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            // Physics World
+            const world = new CANNON.World();
+            world.gravity.set(0, -9.82, 0);
+            world.broadphase = new CANNON.NaiveBroadphase();
+            world.solver.iterations = 10;
+
+            const groundMaterial = new CANNON.Material('ground');
+            const pyramidMaterial = new CANNON.Material('pyramid');
+            const contactMaterial = new CANNON.ContactMaterial(groundMaterial, pyramidMaterial, { friction: 0.5, restitution: 0.1 });
+            world.addContactMaterial(contactMaterial);
+
+            // Ground Plane
+            const planeGeometry = new THREE.PlaneGeometry(50, 50);
+            const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x7BC8A4, transparent: true, opacity: 0.5 });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = -Math.PI / 2;
+            plane.receiveShadow = true;
+            simulationGroup.add(plane);
+            const floorBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+            floorBody.addShape(new CANNON.Plane());
+            floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            world.addBody(floorBody);
+
+            // Texture Loader
+            const textureLoader = new THREE.TextureLoader();
+            const pyramidTexture = textureLoader.load('brick_diffuse.jpg');
+
+            // Pyramids
+            const pyramids = [];
+            function createPyramid(size, position) {
+                const group = new THREE.Group();
+                group.position.copy(position);
+
+                const pyramidGeometry = new THREE.ConeGeometry(size.base, size.height, 4);
+                const pyramidMeshMaterial = new THREE.MeshStandardMaterial({ map: pyramidTexture });
+                const pyramidMesh = new THREE.Mesh(pyramidGeometry, pyramidMeshMaterial);
+                pyramidMesh.position.y = size.height / 2;
+                pyramidMesh.castShadow = true;
+                group.add(pyramidMesh);
+                
+                const pyramidBody = new CANNON.Body({
+                    mass: 5,
+                    position: new CANNON.Vec3(position.x, position.y + size.height / 2, position.z),
+                    material: pyramidMaterial
+                });
+                const pyramidShape = new CANNON.Cylinder(0, size.base, size.height, 4);
+                const quaternion = new CANNON.Quaternion().setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
+                pyramidBody.addShape(pyramidShape, new CANNON.Vec3(), quaternion);
+                world.addBody(pyramidBody);
+                
+                simulationGroup.add(group);
+                pyramids.push({ mesh: group, body: pyramidBody });
+            }
+
+            createPyramid({ base: 1.63, height: 1.45 }, new THREE.Vector3(-6, 0, -6));
+            createPyramid({ base: 1.48, height: 1.35 }, new THREE.Vector3(0, 0, 0));
+            createPyramid({ base: 0.71, height: 0.65 }, new THREE.Vector3(6, 0, 6));
+
+            // UI Controls
+            const pyramidSelect = document.getElementById('pyramid-texture');
+            pyramidSelect.addEventListener('change', () => {
+                const newTexture = textureLoader.load(pyramidSelect.value);
+                pyramids.forEach(p => {
+                    p.mesh.children[0].material.map = newTexture;
+                    p.mesh.children[0].material.needsUpdate = true;
+                });
+            });
+
+            function resetSimulation() {
+                pyramids.forEach((p, i) => {
+                    const initialPosition = new THREE.Vector3(i * 6 - 6, (i === 1) ? 5 : 0, i * 6 - 6);
+                    p.body.position.set(initialPosition.x, initialPosition.y, initialPosition.z);
+                    p.body.velocity.set(0, 0, 0);
+                    p.body.angularVelocity.set(0, 0, 0);
+                    p.body.quaternion.set(0, 0, 0, 1);
+                });
+            }
+            resetSimulation();
+            setInterval(resetSimulation, 10000);
+
+            // 3. Start MindAR engine and render loop
+            const clock = new THREE.Clock();
+            await mindarThree.start();
+
+            renderer.setAnimationLoop(() => {
+                const deltaTime = clock.getDelta();
+                world.step(1 / 60, deltaTime, 3);
+                
+                pyramids.forEach(p => {
+                    p.mesh.position.copy(p.body.position);
+                    p.mesh.quaternion.copy(p.body.quaternion);
+                });
+                
+                renderer.render(scene, camera);
+            });
         });
-
-        // The renderer, scene, and camera are provided by MindAR
-        const { renderer, scene, camera } = mindarThree;
-
-        // 2. Create an anchor for the 3D content
-        // The content will appear on the 0-th target image in your .mind file
-        const anchor = mindarThree.addAnchor(0);
-
-        // --- All 3D objects are added to the anchor's group ---
-
-        // Lighting (add to the main scene to illuminate the models)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(5, 10, 3);
-        scene.add(directionalLight);
-
-        // Ground Plane
-        const planeGeometry = new THREE.PlaneGeometry(50, 50);
-        // Make the ground semi-transparent so the camera feed is visible
-        const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x7BC8A4, transparent: true, opacity: 0.5 });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = -Math.PI / 2;
-        // Scale down the entire scene to fit better on a typical AR marker
-        plane.scale.set(0.1, 0.1, 0.1);
-        anchor.group.add(plane);
-
-
-        // Texture Loader
-        const textureLoader = new THREE.TextureLoader();
-        const brickBumpTexture = textureLoader.load('brick_bump.jpg');
-        const brickDiffuseTexture = textureLoader.load('brick_diffuse.jpg');
-        const brickRoughnessTexture = textureLoader.load('brick_roughness.jpg');
-
-        // Pyramid of Khufu
-        const khufuGroup = new THREE.Group();
-        khufuGroup.position.set(-6, 0, -6);
-        anchor.group.add(khufuGroup);
-
-        const khufuPyramidGeometry = new THREE.ConeGeometry(1.63, 1.45, 4);
-        const khufuPyramidMaterial = new THREE.MeshStandardMaterial({ map: brickBumpTexture });
-        const khufuPyramid = new THREE.Mesh(khufuPyramidGeometry, khufuPyramidMaterial);
-        khufuPyramid.position.y = 1.45 / 2;
-        khufuGroup.add(khufuPyramid);
-
-        const khufuTopGeometry = new THREE.ConeGeometry(0.2, 0.1, 4);
-        const khufuTopMaterial = new THREE.MeshStandardMaterial({ color: 'gold' });
-        const khufuTop = new THREE.Mesh(khufuTopGeometry, khufuTopMaterial);
-        khufuTop.position.y = 1.45;
-        khufuGroup.add(khufuTop);
-
-        // Pyramid of Khafre
-        const khafreGroup = new THREE.Group();
-        anchor.group.add(khafreGroup); // Position is (0,0,0) by default
-
-        const khafrePyramidGeometry = new THREE.ConeGeometry(1.48, 1.35, 4);
-        const khafrePyramidMaterial = new THREE.MeshStandardMaterial({ map: brickDiffuseTexture });
-        const khafrePyramid = new THREE.Mesh(khafrePyramidGeometry, khafrePyramidMaterial);
-        khafrePyramid.position.y = 1.35 / 2;
-        khafreGroup.add(khafrePyramid);
-
-        const khafreTopGeometry = new THREE.ConeGeometry(0.18, 0.1, 4);
-        const khafreTopMaterial = new THREE.MeshStandardMaterial({ color: 'gold' });
-        const khafreTop = new THREE.Mesh(khafreTopGeometry, khafreTopMaterial);
-        khafreTop.position.y = 1.35;
-        khafreGroup.add(khafreTop);
-
-        // Pyramid of Menkaure
-        const menkaureGroup = new THREE.Group();
-        menkaureGroup.position.set(6, 0, 6);
-        anchor.group.add(menkaureGroup);
-
-        const menkaurePyramidGeometry = new THREE.ConeGeometry(0.71, 0.65, 4);
-        const menkaurePyramidMaterial = new THREE.MeshStandardMaterial({ map: brickRoughnessTexture });
-        const menkaurePyramid = new THREE.Mesh(menkaurePyramidGeometry, menkaurePyramidMaterial);
-        menkaurePyramid.position.y = 0.65 / 2;
-        menkaureGroup.add(menkaurePyramid);
-
-        const menkaureTopGeometry = new THREE.ConeGeometry(0.09, 0.05, 4);
-        const menkaureTopMaterial = new THREE.MeshStandardMaterial({ color: 'gold' });
-        const menkaureTop = new THREE.Mesh(menkaureTopGeometry, menkaureTopMaterial);
-        menkaureTop.position.y = 0.65;
-        menkaureGroup.add(menkaureTop);
-        
-        // Scale down the entire group to fit better on the AR marker
-        anchor.group.scale.set(0.1, 0.1, 0.1);
-
-
-        // 3. Start the MindAR engine and render loop
-        await mindarThree.start();
-
-        // The renderer loop is handled by MindAR, so we just need to render on each frame
-        renderer.setAnimationLoop(() => {
-          // You can add animations here that run continuously
-          // For example, rotating the entire pyramid complex
-          // anchor.group.rotation.y += 0.01;
-          renderer.render(scene, camera);
-        });
-      });
     </script>
-  </body>
+</body>
 </html>
