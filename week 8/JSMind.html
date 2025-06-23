@@ -1,76 +1,78 @@
-<script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const mindarThree = new window.MINDAR.IMAGE.MindARThree({
-      container: document.body,
-      imageTargetSrc: "./targets.mind",
-      maxTrack: 1,
-    });
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Комплекс пірамід Гізи – MindAR</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-three.prod.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import {loadGLTF} from 'https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/loader/loader.js';
 
-    const { renderer, scene, camera } = mindarThree;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    const anchor = mindarThree.addAnchor(0);
-    const group = new THREE.Group();
-    anchor.group.add(group);
-
-    // Світло
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(1, 3, 2);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
-
-    const loader = new THREE.TextureLoader();
-    const brickBump = loader.load('./brick_bump.jpg');
-    const brickDiffuse = loader.load('./brick_diffuse.jpg');
-    const brickRoughness = loader.load('./brick_roughness.jpg');
-
-    // Створення пірамід
-    const pyramids = [];
-
-    function createPyramid(scale, position, texture, goldScale = 1) {
-      const pyramidGroup = new THREE.Group();
-      pyramidGroup.position.set(...position);
-      pyramidGroup.scale.set(scale, scale, scale);
-
-      const baseCone = new THREE.Mesh(
-        new THREE.ConeGeometry(1, 1, 4),
-        new THREE.MeshStandardMaterial({ map: texture, roughness: 0.7, metalness: 0.1 })
-      );
-      baseCone.position.y = 0.5;
-      baseCone.rotation.y = Math.PI / 4;
-      baseCone.castShadow = true;
-      baseCone.receiveShadow = true;
-      pyramidGroup.add(baseCone);
-
-      const topCone = new THREE.Mesh(
-        new THREE.ConeGeometry(0.12 * goldScale, 0.08 * goldScale, 4),
-        new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.8, roughness: 0.2 })
-      );
-      topCone.position.y = 1.0;
-      topCone.rotation.y = Math.PI / 4;
-      topCone.castShadow = true;
-      topCone.receiveShadow = true;
-      pyramidGroup.add(topCone);
-
-      group.add(pyramidGroup);
-      pyramids.push(pyramidGroup); // зберігаємо для анімації
-    }
-
-    createPyramid(0.65, [-0.5, 0, -0.5], brickBump);
-    createPyramid(0.59, [0, 0, 0], brickDiffuse);
-    createPyramid(0.28, [0.5, 0, 0.5], brickRoughness, 0.5);
-
-    await mindarThree.start();
-
-    // Анімація обертання
-    renderer.setAnimationLoop(() => {
-      pyramids.forEach(pyramid => {
-        pyramid.rotation.y += 0.01;
+      const mindarThree = new window.MINDAR.IMAGE.MindARThree({
+        container: document.body,
+        imageTargetSrc: './targets.mind',
       });
-      renderer.render(scene, camera);
-    });
-  });
-</script>
 
+      const {renderer, scene, camera} = mindarThree;
+
+      const anchor = mindarThree.addAnchor(0);
+      const pyramidGroup = new THREE.Group();
+
+      // Матеріали
+      const goldMaterial = new THREE.MeshStandardMaterial({ color: 'gold' });
+      const brickMaterial1 = new THREE.MeshStandardMaterial({ color: '#aa7744' });
+      const brickMaterial2 = new THREE.MeshStandardMaterial({ color: '#bb8866' });
+      const brickMaterial3 = new THREE.MeshStandardMaterial({ color: '#996633' });
+
+      const createPyramid = (height, radius, topHeight, topRadius, material, position) => {
+        const group = new THREE.Group();
+
+        const geometry = new THREE.ConeGeometry(radius, height, 4);
+        const cone = new THREE.Mesh(geometry, material);
+        cone.position.y = height / 2;
+        group.add(cone);
+
+        const topGeometry = new THREE.ConeGeometry(topRadius, topHeight, 4);
+        const topCone = new THREE.Mesh(topGeometry, goldMaterial);
+        topCone.position.y = height + topHeight / 2;
+        group.add(topCone);
+
+        group.position.set(...position);
+        return group;
+      };
+
+      // Піраміди
+      const pyramid1 = createPyramid(1.45, 1.63, 0.1, 0.2, brickMaterial1, [-0.06, 0, -0.06]);
+      const pyramid2 = createPyramid(1.35, 1.48, 0.1, 0.18, brickMaterial2, [0, 0, 0]);
+      const pyramid3 = createPyramid(0.65, 0.71, 0.05, 0.09, brickMaterial3, [0.06, 0, 0.06]);
+
+      pyramidGroup.add(pyramid1);
+      pyramidGroup.add(pyramid2);
+      pyramidGroup.add(pyramid3);
+
+      anchor.group.add(pyramidGroup);
+
+      // Освітлення
+      const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+      scene.add(light);
+
+      await mindarThree.start();
+      renderer.setAnimationLoop(() => {
+        renderer.render(scene, camera);
+      });
+    </script>
+  </body>
+</html>
