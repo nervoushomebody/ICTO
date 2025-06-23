@@ -2,69 +2,120 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>AR Піраміди Гізи (MindAR з маркером)</title>
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.7/dist/aframe/mindar-aframe.prod.js"></script>
+    <title>AR Піраміди Гізи</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      body { margin: 0; overflow: hidden; background: transparent; }
-      canvas { position: absolute; top: 0; left: 0; }
+      body {
+        margin: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+      }
+      .example-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
     </style>
+
+    <script>
+      AFRAME.registerComponent('smoothing', {
+        schema: {
+          smoothing: { type: 'number', default: 0.8 },
+          movementThreshold: { type: 'number', default: 0.003 },
+          rotationThreshold: { type: 'number', default: 0.1 }
+        },
+        init: function () {
+          this.visibleStarted = false;
+          this.lastPosition = new THREE.Vector3();
+          this.lastQuaternion = new THREE.Quaternion();
+          this.targetPosition = new THREE.Vector3();
+          this.targetQuaternion = new THREE.Quaternion();
+          this.el.addEventListener('targetFound', () => {
+            this.visibleStarted = true;
+            this.lastPosition.copy(this.el.object3D.position);
+            this.lastQuaternion.copy(this.el.object3D.quaternion);
+          });
+          this.el.addEventListener('targetLost', () => {
+            this.visibleStarted = false;
+          });
+        },
+        tick: function () {
+          if (!this.visibleStarted) return;
+          this.targetPosition.copy(this.el.object3D.position);
+          this.targetQuaternion.copy(this.el.object3D.quaternion);
+          const movementDistance = this.lastPosition.distanceTo(this.targetPosition);
+          const rotationDiff = Math.abs(this.lastQuaternion.angleTo(this.targetQuaternion) * 180 / Math.PI);
+          const isMoving = movementDistance > this.data.movementThreshold;
+          const isRotating = rotationDiff > this.data.rotationThreshold;
+          if (!isMoving && !isRotating) return;
+          this.el.object3D.position.lerp(this.lastPosition, this.data.smoothing);
+          this.el.object3D.quaternion.slerp(this.lastQuaternion, this.data.smoothing);
+          if (isMoving) this.lastPosition.lerp(this.targetPosition, 1 - this.data.smoothing);
+          if (isRotating) this.lastQuaternion.slerp(this.targetQuaternion, 1 - this.data.smoothing);
+        }
+      });
+    </script>
   </head>
 
   <body>
-    <a-scene
-      mindar-image="imageTargetSrc: targets.mind; autoStart: true; uiScanning: true"
-      color-space="sRGB"
-      renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true;"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: true"
-      embedded
-    >
+    <div class="example-container">
+      <a-scene mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1;" embedded color-space="sRGB"
+               renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true;"
+               vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        
+        <!-- Текстури -->
+        <a-assets>
+          <img id="brick_bump" src="brick_bump.jpg" crossorigin="anonymous">
+          <img id="brick_diffuse" src="brick_diffuse.jpg" crossorigin="anonymous">
+          <img id="brick_roughness" src="brick_roughness.jpg" crossorigin="anonymous">
+        </a-assets>
 
-      <!-- Завантаження текстур -->
-      <a-assets>
-        <img id="brick_bump" src="brick_bump.jpg">
-        <img id="brick_diffuse" src="brick_diffuse.jpg">
-        <img id="brick_roughness" src="brick_roughness.jpg">
-      </a-assets>
+        <!-- Камера -->
+        <a-camera position="0 0 0" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
 
-      <!-- Камера -->
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <!-- AR Контейнер -->
+        <a-entity mindar-image-target="targetIndex: 0" smoothing="smoothing: 0.9; movementThreshold: 0.002; rotationThreshold: 0.08">
 
-      <!-- Контейнер, який з'являється при розпізнаванні -->
-      <a-entity mindar-image-target="targetIndex: 0" position="0 0 0" scale="1.5 1.5 1.5">
+          <!-- Група пірамід -->
+          <a-entity position="0 0 0" scale="0.05 0.05 0.05" rotation="-90 0 0">
 
-        <!-- Піраміда Хеопса -->
-        <a-entity position="-1 0 -1">
-          <a-cone height="1.45" radius-bottom="1.63" segments-radial="4"
-                  material="src: #brick_bump"
-                  position="0 0.725 0"></a-cone>
-          <a-cone height="0.1" radius-bottom="0.2" segments-radial="4"
-                  material="color: gold"
-                  position="0 1.45 0"></a-cone>
+            <!-- Піраміда Хеопса -->
+            <a-entity position="-20 0 -20">
+              <a-cone height="29" radius-bottom="32.6" segments-radial="4"
+                      material="src: #brick_bump"
+                      position="0 14.5 0"></a-cone>
+              <a-cone height="2" radius-bottom="4" segments-radial="4"
+                      material="color: gold"
+                      position="0 29 0"></a-cone>
+            </a-entity>
+
+            <!-- Піраміда Хефрена -->
+            <a-entity position="0 0 0">
+              <a-cone height="27" radius-bottom="29.6" segments-radial="4"
+                      material="src: #brick_diffuse"
+                      position="0 13.5 0"></a-cone>
+              <a-cone height="2" radius-bottom="3.6" segments-radial="4"
+                      material="color: gold"
+                      position="0 27 0"></a-cone>
+            </a-entity>
+
+            <!-- Піраміда Мікеріна -->
+            <a-entity position="20 0 20">
+              <a-cone height="13" radius-bottom="14.2" segments-radial="4"
+                      material="src: #brick_roughness"
+                      position="0 6.5 0"></a-cone>
+              <a-cone height="1" radius-bottom="2" segments-radial="4"
+                      material="color: gold"
+                      position="0 13 0"></a-cone>
+            </a-entity>
+
+          </a-entity>
         </a-entity>
-
-        <!-- Піраміда Хефрена -->
-        <a-entity position="0 0 0">
-          <a-cone height="1.35" radius-bottom="1.48" segments-radial="4"
-                  material="src: #brick_diffuse"
-                  position="0 0.675 0"></a-cone>
-          <a-cone height="0.1" radius-bottom="0.18" segments-radial="4"
-                  material="color: gold"
-                  position="0 1.35 0"></a-cone>
-        </a-entity>
-
-        <!-- Піраміда Мікеріна -->
-        <a-entity position="1 0 1">
-          <a-cone height="0.65" radius-bottom="0.71" segments-radial="4"
-                  material="src: #brick_roughness"
-                  position="0 0.325 0"></a-cone>
-          <a-cone height="0.05" radius-bottom="0.09" segments-radial="4"
-                  material="color: gold"
-                  position="0 0.65 0"></a-cone>
-        </a-entity>
-
-      </a-entity>
-    </a-scene>
+      </a-scene>
+    </div>
   </body>
 </html>
