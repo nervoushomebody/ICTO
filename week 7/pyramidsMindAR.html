@@ -2,14 +2,13 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>AR Pyramids of Giza</title>
+    <title>AR Pyramids of Giza (Larger)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        /* Keep the body and container fullscreen and remove overflow */
         body {
             margin: 0;
             overflow: hidden;
@@ -24,8 +23,7 @@
     </style>
 
     <script>
-        // Your custom smoothing component is a great addition for stability.
-        // No changes are needed here.
+        // Smoothing component (unchanged)
         AFRAME.registerComponent('smoothing', {
             schema: {
                 smoothing: { type: 'number', default: 0.8 },
@@ -85,7 +83,7 @@
 
             <a-entity mindar-image-target="targetIndex: 0" smoothing>
 
-                <a-entity position="0 0 0" scale="0.1 0.1 0.1" rotation="0 0 0">
+                <a-entity position="0 0 0" scale="0.2 0.2 0.2" rotation="0 0 0">
                     
                     <a-light type="ambient" color="#888"></a-light>
                     <a-light type="directional" position="1 3 2" intensity="0.8"></a-light>
