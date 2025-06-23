@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR Піраміди Гізи (без маркерів)</title>
+    <title>AR Піраміди Гізи (з текстурами)</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.min.js"></script>
     <style>
@@ -15,18 +15,26 @@
       arjs="sourceType: webcam; trackingMethod: best;"
       vr-mode-ui="enabled: false"
       renderer="logarithmicDepthBuffer: true;">
-      
-      <!-- Група пірамід -->
+
+      <!-- Завантаження текстур -->
+      <a-assets>
+        <img id="brick_bump" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+        <img id="brick_diffuse" src="https://cdn.aframe.io/a-painter/images/floor-roughness.jpg">
+        <img id="brick_roughness" src="https://cdn.aframe.io/a-painter/images/floor-normal.jpg">
+      </a-assets>
+
+      <!-- Група пірамід (масштабована та центрується) -->
       <a-entity position="0 0 -3" scale="0.5 0.5 0.5">
+        
         <!-- Піраміда Хеопса -->
         <a-entity position="-1 0 -1">
           <a-cone 
-            height="1.45" radius-bottom="1.63" segments-radial="4"
-            material="color: #c2b280"
+            geometry="primitive: cone; height: 1.45; radiusBottom: 1.63; segmentsRadial: 4"
+            material="src: #brick_bump"
             position="0 0.725 0">
           </a-cone>
           <a-cone
-            height="0.1" radius-bottom="0.2" segments-radial="4"
+            geometry="primitive: cone; height: 0.1; radiusBottom: 0.2; segmentsRadial: 4"
             material="color: gold"
             position="0 1.45 0">
           </a-cone>
@@ -35,12 +43,12 @@
         <!-- Піраміда Хефрена -->
         <a-entity position="0 0 0">
           <a-cone 
-            height="1.35" radius-bottom="1.48" segments-radial="4"
-            material="color: #bba37e"
+            geometry="primitive: cone; height: 1.35; radiusBottom: 1.48; segmentsRadial: 4"
+            material="src: #brick_diffuse"
             position="0 0.675 0">
           </a-cone>
           <a-cone
-            height="0.1" radius-bottom="0.18" segments-radial="4"
+            geometry="primitive: cone; height: 0.1; radiusBottom: 0.18; segmentsRadial: 4"
             material="color: gold"
             position="0 1.35 0">
           </a-cone>
@@ -49,16 +57,17 @@
         <!-- Піраміда Мікеріна -->
         <a-entity position="1 0 1">
           <a-cone 
-            height="0.65" radius-bottom="0.71" segments-radial="4"
-            material="color: #aa9166"
+            geometry="primitive: cone; height: 0.65; radiusBottom: 0.71; segmentsRadial: 4"
+            material="src: #brick_roughness"
             position="0 0.325 0">
           </a-cone>
           <a-cone
-            height="0.05" radius-bottom="0.09" segments-radial="4"
+            geometry="primitive: cone; height: 0.05; radiusBottom: 0.09; segmentsRadial: 4"
             material="color: gold"
             position="0 0.65 0">
           </a-cone>
         </a-entity>
+
       </a-entity>
 
       <!-- Камера -->
