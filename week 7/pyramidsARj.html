@@ -49,7 +49,7 @@
 
     <div class="arjs-loader">
         <div>Loading AR Scene...</div>
-        <div class="instruction">Point your camera at the Gizeh marker to view the 3D model.</div>
+        <div class="instruction">Point your camera at the Hiro marker to view the 3D model.</div>
     </div>
 
     <a-scene
@@ -64,8 +64,7 @@
             <img id="brick_roughness" src="brick_roughness.jpg" crossorigin="anonymous">
         </a-assets>
 
-        <!-- Замість preset="hiro" вказуємо path до свого патерну -->
-        <a-marker type="pattern" url="pattern-Gizeh.patt">
+        <a-marker preset="hiro" type="pattern">
             <a-entity
                 id="pyramidGroup"
                 rotation="-90 0 0" position="0 0 -1"
