@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HandPose - Обчислення кутів між пальцями</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose@latest"></script>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+        }
+        
+        #results {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 350px;
+            font-size: 12px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -1;
+        }
+        
+        .angle-info {
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .finger-length {
+            color: #88ff88;
+            font-weight: bold;
+        }
+        
+        .angle-value {
+            color: #ffff88;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        #status {
+            color: #ff8888;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" autoplay muted playsinline></video>
+    
+    <div id="controls">
+        <h3>HandPose Detector</h3>
+        <button id="start-btn">Почати розпізнавання</button>
+        <button id="stop-btn" disabled>Зупинити</button>
+        <div id="status">Натисніть "Почати" для запуску</div>
+    </div>
+    
+    <div id="results">
+        <h3>Результати обчислень</h3>
+        <div id="finger-lengths"></div>
+        <div id="angles-between-fingers"></div>
+    </div>
+
+    <script>
+        let model = null;
+        let video = null;
+        let isRunning = false;
+        let animationFrame = null;
+
+        // Індекси ключових точок для пальців
+        const FINGER_INDICES = {
+            thumb: [1, 2, 3, 4],      // Великий палець: CMC, MCP, IP, TIP
+            index: [5, 6, 7, 8],      // Вказівний: MCP, PIP, DIP, TIP
+            middle: [9, 10, 11, 12],  // Середній: MCP, PIP, DIP, TIP
+            ring: [13, 14, 15, 16],   // Безіменний: MCP, PIP, DIP, TIP
+            pinky: [17, 18, 19, 20]   // Мізинець: MCP, PIP, DIP, TIP
+        };
+
+        const FINGER_NAMES = {
+            thumb: 'Великий',
+            index: 'Вказівний', 
+            middle: 'Середній',
+            ring: 'Безіменний',
+            pinky: 'Мізинець'
+        };
+
+        // Ініціалізація камери та моделі
+        async function init() {
+            try {
+                document.getElementById('status').textContent = 'Завантаження моделі...';
+                
+                // Завантаження HandPose моделі
+                model = await handpose.load();
+                console.log('✅ HandPose модель завантажена');
+                
+                // Доступ до камери
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        width: 640, 
+                        height: 480,
+                        facingMode: 'user'
+                    }
+                });
+                
+                video = document.getElementById('video');
+                video.srcObject = stream;
+                
+                await new Promise(resolve => {
+                    video.onloadedmetadata = resolve;
+                });
+                
+                document.getElementById('status').textContent = '✅ Готово до роботи';
+                document.getElementById('start-btn').disabled = false;
+                
+            } catch (error) {
+                console.error('Помилка ініціалізації:', error);
+                document.getElementById('status').textContent = 'Помилка: ' + error.message;
+            }
+        }
+
+        // Обчислення довжини пальця (від MCP до TIP)
+        function calculateFingerLength(landmarks, fingerIndices) {
+            const mcpIndex = fingerIndices[0]; // MCP точка
+            const tipIndex = fingerIndices[3]; // TIP точка
+            
+            const mcp = landmarks[mcpIndex];
+            const tip = landmarks[tipIndex];
+            
+            const dx = tip[0] - mcp[0];
+            const dy = tip[1] - mcp[1];
+            const dz = tip[2] - mcp[2];
+            
+            return Math.sqrt(dx*dx + dy*dy + dz*dz);
+        }
+
+        // Створення вектора від MCP до TIP
+        function createFingerVector(landmarks, fingerIndices) {
+            const mcpIndex = fingerIndices[0];
+            const tipIndex = fingerIndices[3];
+            
+            const mcp = landmarks[mcpIndex];
+            const tip = landmarks[tipIndex];
+            
+            return [
+                tip[0] - mcp[0],
+                tip[1] - mcp[1], 
+                tip[2] - mcp[2]
+            ];
+        }
+
+        // Обчислення скалярного добутку векторів
+        function dotProduct(v1, v2) {
+            return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
+        }
+
+        // Обчислення довжини вектора
+        function vectorLength(v) {
+            return Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+        }
+
+        // Обчислення кута між двома векторами (в градусах)
+        function calculateAngleBetweenVectors(v1, v2) {
+            const dot = dotProduct(v1, v2);
+            const len1 = vectorLength(v1);
+            const len2 = vectorLength(v2);
+            
+            if (len1 === 0 || len2 === 0) return 0;
+            
+            const cosAngle = dot / (len1 * len2);
+            // Обмежуємо значення для уникнення помилок округлення
+            const clampedCos = Math.max(-1, Math.min(1, cosAngle));
+            
+            return Math.acos(clampedCos) * (180 / Math.PI);
+        }
+
+        // Основний цикл розпізнавання
+        async function detectHands() {
+            if (!isRunning || !model || !video) return;
+
+            try {
+                const predictions = await model.estimateHands(video);
+                
+                if (predictions.length > 0) {
+                    const landmarks = predictions[0].landmarks;
+                    
+                    // Обчислення довжин пальців
+                    const fingerLengths = {};
+                    const fingerVectors = {};
+                    
+                    for (const [fingerName, indices] of Object.entries(FINGER_INDICES)) {
+                        fingerLengths[fingerName] = calculateFingerLength(landmarks, indices);
+                        fingerVectors[fingerName] = createFingerVector(landmarks, indices);
+                    }
+                    
+                    // Обчислення кутів між сусідніми пальцями
+                    const angles = {};
+                    const fingerOrder = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+                    
+                    for (let i = 0; i < fingerOrder.length - 1; i++) {
+                        const finger1 = fingerOrder[i];
+                        const finger2 = fingerOrder[i + 1];
+                        
+                        const angle = calculateAngleBetweenVectors(
+                            fingerVectors[finger1], 
+                            fingerVectors[finger2]
+                        );
+                        
+                        angles[`${finger1}_${finger2}`] = angle;
+                    }
+                    
+                    // Відображення результатів
+                    displayResults(fingerLengths, angles);
+                    
+                } else {
+                    document.getElementById('finger-lengths').innerHTML = '<div style="color: #ff8888;">Рука не виявлена</div>';
+                    document.getElementById('angles-between-fingers').innerHTML = '';
+                }
+                
+            } catch (error) {
+                console.error('Помилка розпізнавання:', error);
+            }
+            
+            animationFrame = requestAnimationFrame(detectHands);
+        }
+
+        // Відображення результатів
+        function displayResults(fingerLengths, angles) {
+            // Відображення довжин пальців
+            let lengthsHTML = '<h4>Довжини пальців (пікселі):</h4>';
+            for (const [fingerName, length] of Object.entries(fingerLengths)) {
+                lengthsHTML += `
+                    <div class="angle-info">
+                        <span>${FINGER_NAMES[fingerName]}:</span> 
+                        <span class="finger-length">${length.toFixed(1)} px</span>
+                    </div>
+                `;
+            }
+            document.getElementById('finger-lengths').innerHTML = lengthsHTML;
+            
+            // Відображення кутів між пальцями
+            let anglesHTML = '<h4>Кути між пальцями:</h4>';
+            for (const [fingerPair, angle] of Object.entries(angles)) {
+                const [finger1, finger2] = fingerPair.split('_');
+                anglesHTML += `
+                    <div class="angle-info">
+                        <span>${FINGER_NAMES[finger1]} ↔ ${FINGER_NAMES[finger2]}:</span><br>
+                        <span class="angle-value">${angle.toFixed(1)}°</span>
+                    </div>
+                `;
+            }
+            document.getElementById('angles-between-fingers').innerHTML = anglesHTML;
+        }
+
+        // Запуск розпізнавання
+        function startDetection() {
+            if (!model) {
+                alert('Модель ще не завантажена!');
+                return;
+            }
+            
+            isRunning = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            document.getElementById('status').textContent = '🔄 Розпізнавання активне';
+            
+            detectHands();
+        }
+
+        // Зупинка розпізнавання
+        function stopDetection() {
+            isRunning = false;
+            
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = true;
+            document.getElementById('status').textContent = '⏸️ Розпізнавання зупинено';
+            
+            document.getElementById('finger-lengths').innerHTML = '';
+            document.getElementById('angles-between-fingers').innerHTML = '';
+        }
+
+        // Обробники подій
+        document.getElementById('start-btn').addEventListener('click', startDetection);
+        document.getElementById('stop-btn').addEventListener('click', stopDetection);
+
+        // Ініціалізація при завантаженні сторінки
+        window.addEventListener('load', init);
+        
+        // Обробка помилок
+        window.addEventListener('error', (e) => {
+            console.error('Глобальна помилка:', e.error);
+            document.getElementById('status').textContent = 'Помилка: ' + e.error.message;
+        });
+    </script>
+</body>
+</html>
