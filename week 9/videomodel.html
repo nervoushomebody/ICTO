@@ -105,19 +105,55 @@
       scene.add(dirLight);
 
       // === МАРКЕР 1 (3D МОДЕЛЬ) ===
-      updateMainStatus("Завантаження маркера 1...");
-      const anchor1 = mind1.addAnchor(0);
+       mindarThree1 = new MindARThree({
+                        container: document.body,
+                        imageTargetSrc: "./marker1.mind",
+                    });
 
-      const loader = new GLTFLoader();
-      loader.load("./model.glb", (gltf) => {
-        gltf.scene.scale.set(0.5, 0.5, 0.5);
-        gltf.scene.position.set(0, -0.5, 0);
-        gltf.scene.userData.rotationSpeed = 0.01;
-        anchor1.group.add(gltf.scene);
-      });
+                    const { renderer: renderer1, scene: scene1, camera: camera1 } = mindarThree1;
+                    renderer = renderer1;
+                    scene = scene1;
+                    camera = camera1;
 
-      anchor1.onTargetFound = () => updateMarkerStatus(1, true);
-      anchor1.onTargetLost = () => updateMarkerStatus(1, false);
+                    const anchor1 = mindarThree1.addAnchor(0);
+
+                    // Освещение
+                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                    scene.add(ambientLight);
+
+                    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                    directionalLight.position.set(1, 1, 1);
+                    scene.add(directionalLight);
+
+                    // Загрузка 3D модели для первого маркера
+                    const loader = new GLTFLoader();
+                    const modelUrl = "https://raw.githubusercontent.com/hiukim/mind-ar-js/master/examples/image-tracking/assets/band-example/raccoon/scene.gltf";
+                    
+                    loader.load(
+                        modelUrl,
+                        (gltf) => {
+                            gltf.scene.scale.set(0.1, 0.1, 0.1);
+                            gltf.scene.position.set(0, -0.4, 0);
+                            gltf.scene.userData.rotationSpeed = 0.01;
+                            anchor1.group.add(gltf.scene);
+                            console.log("✅ 3D модель загружена для marker.mind");
+                        },
+                        undefined,
+                        (error) => {
+                            console.error("❌ Ошибка загрузки 3D модели:", error);
+                        }
+                    );
+
+                    // Обработчики для первого маркера
+                    anchor1.onTargetFound = () => {
+                        console.log("🎯 МАРКЕР 1 (marker1.mind) НАЙДЕН!");
+                        updateMarkerStatus(1, true);
+                    };
+
+                    anchor1.onTargetLost = () => {
+                        console.log("❌ Маркер 1 (marker1.mind) потерян");
+                        updateMarkerStatus(1, false);
+                    };
 
       // === МАРКЕР 2 (ВІДЕО) ===
       updateMainStatus("Завантаження маркера 2...");
@@ -129,7 +165,7 @@
       const anchor2 = mind2.addAnchor(0);
 
       const video = document.createElement("video");
-      video.src = "./videomp4";
+      video.src = "./video.mp4";
       video.loop = true;
       video.muted = true;
       video.playsInline = true;
