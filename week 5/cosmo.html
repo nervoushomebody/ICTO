@@ -1,85 +1,138 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar System with MindAR</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.7/dist/aframe/mindar-aframe.prod.js"></script>
-    <script src="cosmo.js"></script>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      canvas { position: absolute; top: 0; left: 0; }
+      .a-scene { height: 100vh; width: 100vw; }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <a-scene
-      mindar-image="imageTargetSrc: targets.mind; autoStart: true;"
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true;"
       vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: true"
-      embedded
-      renderer="colorManagement: true, physicallyCorrectLights">
+      device-orientation-permission-ui="enabled: false"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      embedded>
       
       <a-assets>
-        <img id="sun" src="sun.jpg">
-        <img id="mercury" src="mercury.jpg">
-        <img id="venus" src="venus.jpg">
-        <img id="earth" src="earth.jpg">
-        <img id="mars" src="mars.jpg">
-        <img id="jupiter" src="jupiter.jpg">
-        <img id="saturn" src="saturn.jpg">
-        <img id="uranus" src="uranus.jpg">
-        <img id="neptune" src="neptune.jpg">
+        <img id="sun" src="./sun.jpg">
+        <img id="mercury" src="./mercury.jpg">
+        <img id="venus" src="./venus.jpg">
+        <img id="earth" src="./earth.jpg">
+        <img id="mars" src="./mars.jpg">
+        <img id="jupiter" src="./jupiter.jpg">
+        <img id="saturn" src="./saturn.jpg">
+        <img id="uranus" src="./uranus.jpg">
+        <img id="neptune" src="./neptune.jpg">
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <!-- Сонце -->
-        <a-sphere src="#sun" radius="0.5" position="0 0 0"></a-sphere>
-        <a-text value="Sun" align="center" position="0 0.6 0" color="yellow" width="2"></a-text>
+        
+        <a-sphere src="#sun" radius="0.4" position="0 0 0"
+                  animation="property: rotation; to: 0 360 0; loop: true; dur: 25000; easing: linear;">
+            <a-light type="point" color="#FFF" intensity="1.5"></a-light>
+        </a-sphere>
+        <a-text value="Sun" align="center" position="0 0.5 0" color="yellow" width="2"></a-text>
 
-        <!-- Планети -->
-        <a-entity planet="name: mercury; dist: 0.7; speed: 0.02">
+        <a-entity orbit-controller="distance: 0.7; speed: 0.02;">
           <a-sphere src="#mercury" radius="0.05"></a-sphere>
-          <a-text value="Mercury" align="center" position="0 0.07 0" color="white" width="1.5"></a-text>
+          <a-text value="Mercury" align="center" position="0 0.08 0" color="white" width="1.5"
+                  billboard-text></a-text>
         </a-entity>
 
-        <a-entity planet="name: venus; dist: 1; speed: 0.015">
+        <a-entity orbit-controller="distance: 1.0; speed: 0.015;">
           <a-sphere src="#venus" radius="0.07"></a-sphere>
-          <a-text value="Venus" align="center" position="0 0.09 0" color="white" width="1.5"></a-text>
+          <a-text value="Venus" align="center" position="0 0.1 0" color="white" width="1.5"
+                  billboard-text></a-text>
         </a-entity>
 
-        <a-entity planet="name: earth; dist: 1.4; speed: 0.01">
+        <a-entity orbit-controller="distance: 1.4; speed: 0.01;">
           <a-sphere src="#earth" radius="0.09"></a-sphere>
-          <a-text value="Earth" align="center" position="0 0.11 0" color="white" width="1.5"></a-text>
+          <a-text value="Earth" align="center" position="0 0.12 0" color="white" width="1.5"
+                  billboard-text></a-text>
         </a-entity>
 
-        <a-entity planet="name: mars; dist: 1.8; speed: 0.008">
+        <a-entity orbit-controller="distance: 1.8; speed: 0.008;">
           <a-sphere src="#mars" radius="0.08"></a-sphere>
-          <a-text value="Mars" align="center" position="0 0.1 0" color="white" width="1.5"></a-text>
+          <a-text value="Mars" align="center" position="0 0.11 0" color="white" width="1.5"
+                  billboard-text></a-text>
         </a-entity>
 
-        <a-entity planet="name: jupiter; dist: 2.5; speed: 0.006">
+        <a-entity orbit-controller="distance: 2.5; speed: 0.006;">
           <a-sphere src="#jupiter" radius="0.15"></a-sphere>
-          <a-text value="Jupiter" align="center" position="0 0.18 0" color="white" width="2"></a-text>
+          <a-text value="Jupiter" align="center" position="0 0.18 0" color="white" width="2"
+                  billboard-text></a-text>
         </a-entity>
 
-        <a-entity planet="name: saturn; dist: 3.2; speed: 0.005">
+        <a-entity orbit-controller="distance: 3.2; speed: 0.005;">
           <a-sphere src="#saturn" radius="0.13"></a-sphere>
-          <a-ring color="#c2b280" radius-inner="0.15" radius-outer="0.22" rotation="-90 0 0" material="opacity:0.7"></a-ring>
-          <a-text value="Saturn" align="center" position="0 0.15 0" color="white" width="2"></a-text>
+          <a-ring color="#c2b280" radius-inner="0.15" radius-outer="0.22" rotation="-90 0 0"></a-ring>
+          <a-text value="Saturn" align="center" position="0 0.15 0" color="white" width="2"
+                  billboard-text></a-text>
         </a-entity>
 
-        <a-entity planet="name: uranus; dist: 3.8; speed: 0.004">
+        <a-entity orbit-controller="distance: 3.8; speed: 0.004;">
           <a-sphere src="#uranus" radius="0.11"></a-sphere>
-          <a-text value="Uranus" align="center" position="0 0.13 0" color="white" width="1.5"></a-text>
+          <a-text value="Uranus" align="center" position="0 0.14 0" color="white" width="1.5"
+                  billboard-text></a-text>
         </a-entity>
 
-        <a-entity planet="name: neptune; dist: 4.4; speed: 0.003">
+        <a-entity orbit-controller="distance: 4.4; speed: 0.003;">
           <a-sphere src="#neptune" radius="0.1"></a-sphere>
-          <a-text value="Neptune" align="center" position="0 0.12 0" color="white" width="1.5"></a-text>
+          <a-text value="Neptune" align="center" position="0 0.13 0" color="white" width="1.5"
+                  billboard-text></a-text>
         </a-entity>
+
       </a-entity>
     </a-scene>
-  </body>
+
+    <script>
+      // Компонент для обертання планет по орбіті
+      AFRAME.registerComponent('orbit-controller', {
+        schema: {
+          distance: { type: 'number', default: 1 }, // Відстань від центру
+          speed: { type: 'number', default: 0.01 }, // Швидкість обертання
+          initialAngle: {type: 'number', default: Math.random() * 360} // Початковий кут, щоб планети не стартували з однієї точки
+        },
+
+        init: function () {
+          // Встановлюємо початковий кут в радіанах
+          this.angle = this.data.initialAngle * (Math.PI / 180);
+        },
+
+        tick: function (time, deltaTime) {
+          // Збільшуємо кут на кожному кадрі
+          // deltaTime забезпечує плавність анімації незалежно від частоти кадрів
+          this.angle += this.data.speed * (deltaTime / 1000);
+
+          // Розраховуємо нові координати X та Z за допомогою тригонометрії
+          const x = this.data.distance * Math.cos(this.angle);
+          const z = this.data.distance * Math.sin(this.angle);
+          
+          // Встановлюємо нову позицію для об'єкта (планети)
+          this.el.setAttribute('position', { x: x, y: 0, z: z });
+          
+          // Обертаємо саму планету навколо своєї осі
+          this.el.object3D.rotation.y += 0.01;
+        }
+      });
+      
+      // Додатковий компонент, щоб текст завжди був повернутий до камери
+      AFRAME.registerComponent('billboard-text', {
+        tick: function () {
+            const camera = this.el.sceneEl.camera;
+            if (camera) {
+                this.el.object3D.lookAt(camera.getWorldPosition(new THREE.Vector3()));
+            }
+        }
+      });
+    </script>
+</body>
 </html>
