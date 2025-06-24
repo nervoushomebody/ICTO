@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
-      /* Прибираємо всі відступи і робимо тіло сторінки та сцену на весь екран */
       html, body {
         margin: 0;
         padding: 0;
@@ -17,7 +16,7 @@
         overflow: hidden;
       }
       a-scene {
-        display: block; /* Важливо для уникнення зайвих відступів */
+        display: block;
         width: 100%;
         height: 100%;
       }
@@ -41,6 +40,7 @@
         <img id="saturn" src="./saturn.jpg">
         <img id="uranus" src="./uranus.jpg">
         <img id="neptune" src="./neptune.jpg">
+        
         <img id="scanning-ui" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.1/examples/image-tracking/assets/scanning.png">
       </a-assets>
 
@@ -52,43 +52,35 @@
             <a-light type="point" color="#FFF" intensity="1.5"></a-light>
         </a-sphere>
         <a-text value="Sun" align="center" position="0 0.5 0" color="yellow" width="2"></a-text>
-
         <a-entity orbit-controller="distance: 0.7; speed: 0.02;">
           <a-sphere src="#mercury" radius="0.05"></a-sphere>
           <a-text value="Mercury" align="center" position="0 0.08 0" color="white" width="1.5" billboard-text></a-text>
         </a-entity>
-
         <a-entity orbit-controller="distance: 1.0; speed: 0.015;">
           <a-sphere src="#venus" radius="0.07"></a-sphere>
           <a-text value="Venus" align="center" position="0 0.1 0" color="white" width="1.5" billboard-text></a-text>
         </a-entity>
-
         <a-entity orbit-controller="distance: 1.4; speed: 0.01;">
           <a-sphere src="#earth" radius="0.09"></a-sphere>
           <a-text value="Earth" align="center" position="0 0.12 0" color="white" width="1.5" billboard-text></a-text>
         </a-entity>
-
         <a-entity orbit-controller="distance: 1.8; speed: 0.008;">
           <a-sphere src="#mars" radius="0.08"></a-sphere>
           <a-text value="Mars" align="center" position="0 0.11 0" color="white" width="1.5" billboard-text></a-text>
         </a-entity>
-
         <a-entity orbit-controller="distance: 2.5; speed: 0.006;">
           <a-sphere src="#jupiter" radius="0.15"></a-sphere>
           <a-text value="Jupiter" align="center" position="0 0.18 0" color="white" width="2" billboard-text></a-text>
         </a-entity>
-
         <a-entity orbit-controller="distance: 3.2; speed: 0.005;">
           <a-sphere src="#saturn" radius="0.13"></a-sphere>
           <a-ring color="#c2b280" radius-inner="0.15" radius-outer="0.22" rotation="-90 0 0"></a-ring>
           <a-text value="Saturn" align="center" position="0 0.15 0" color="white" width="2" billboard-text></a-text>
         </a-entity>
-
         <a-entity orbit-controller="distance: 3.8; speed: 0.004;">
           <a-sphere src="#uranus" radius="0.11"></a-sphere>
           <a-text value="Uranus" align="center" position="0 0.14 0" color="white" width="1.5" billboard-text></a-text>
         </a-entity>
-
         <a-entity orbit-controller="distance: 4.4; speed: 0.003;">
           <a-sphere src="#neptune" radius="0.1"></a-sphere>
           <a-text value="Neptune" align="center" position="0 0.13 0" color="white" width="1.5" billboard-text></a-text>
@@ -103,9 +95,7 @@
           speed: { type: 'number', default: 0.01 },
           initialAngle: {type: 'number', default: Math.random() * 360}
         },
-        init: function () {
-          this.angle = this.data.initialAngle * (Math.PI / 180);
-        },
+        init: function () { this.angle = this.data.initialAngle * (Math.PI / 180); },
         tick: function (time, deltaTime) {
           this.angle += this.data.speed * (deltaTime / 1000);
           const x = this.data.distance * Math.cos(this.angle);
@@ -114,13 +104,10 @@
           this.el.object3D.rotation.y += 0.01;
         }
       });
-      
       AFRAME.registerComponent('billboard-text', {
         tick: function () {
             const camera = this.el.sceneEl.camera;
-            if (camera) {
-                this.el.object3D.lookAt(camera.getWorldPosition(new THREE.Vector3()));
-            }
+            if (camera) { this.el.object3D.lookAt(camera.getWorldPosition(new THREE.Vector3())); }
         }
       });
     </script>
