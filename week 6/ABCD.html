@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
+  <script>
+    AFRAME.registerComponent('marker-network', {
+      init: function () {
+        this.markers = {
+          'a': document.getElementById('marker-a'),
+          'b': document.getElementById('marker-b'),
+          'c': document.getElementById('marker-c'),
+          'd': document.getElementById('marker-d')
+        };
+
+        this.markerVisible = { a: false, b: false, c: false, d: false };
+
+        this.connections = [
+          ['a', 'b'],
+          ['b', 'c'],
+          ['c', 'd'],
+          ['d', 'a'],
+          ['a', 'c'],
+          ['b', 'd']
+        ];
+
+        this.lines = {};
+        this.connections.forEach(pair => {
+          const id = pair.join('');
+          this.lines[id] = this.createLine(pair[0], pair[1]);
+          this.lines[id].setAttribute('visible', false);
+        });
+
+        this.triangleTexts = [];
+
+        Object.keys(this.markers).forEach(id => {
+          this.setupMarkerEvents(id);
+        });
+      },
+
+      createLine: function (idA, idB) {
+        const line = document.createElement('a-cylinder');
+
+        line.setAttribute('color', (['ab', 'bc', 'cd', 'da'].includes(idA + idB) || ['ab', 'bc', 'cd', 'da'].includes(idB + idA)) ? 'red' : 'blue');
+        line.setAttribute('radius', '2.5'); // сделаем линии толще
+        line.setAttribute('rotation', '90 0 0');
+
+        document.querySelector('a-scene').appendChild(line);
+        return line;
+      },
+
+      setupMarkerEvents: function (id) {
+        const marker = this.markers[id];
+        const self = this;
+
+        marker.addEventListener("targetFound", function () {
+          self.markerVisible[id] = true;
+          self.updateLines();
+        });
+
+        marker.addEventListener("targetLost", function () {
+          self.markerVisible[id] = false;
+          self.updateLines();
+        });
+      },
+
+      updateLines: function () {
+        this.connections.forEach(pair => {
+          const id = pair.join('');
+          const isVisible = this.markerVisible[pair[0]] && this.markerVisible[pair[1]];
+          this.lines[id].setAttribute('visible', isVisible);
+
+          if (isVisible) {
+            this.updateLinePosition(this.lines[id], this.markers[pair[0]], this.markers[pair[1]]);
+          }
+        });
+      },
+
+      updateLinePosition: function (line, markerA, markerB) {
+        const posA = new THREE.Vector3();
+        const posB = new THREE.Vector3();
+        markerA.object3D.getWorldPosition(posA);
+        markerB.object3D.getWorldPosition(posB);
+
+        const distance = posA.distanceTo(posB);
+
+        const midPoint = {
+          x: (posA.x + posB.x) / 2,
+          y: (posA.y + posB.y) / 2,
+          z: (posA.z + posB.z) / 2
+        };
+
+        line.setAttribute('position', midPoint);
+        line.setAttribute('height', distance);
+
+        line.object3D.lookAt(posB);
+        line.object3D.rotateX(Math.PI / 2);
+      },
+
+      removeOldTexts: function () {
+        this.triangleTexts.forEach(el => el.parentNode.removeChild(el));
+        this.triangleTexts = [];
+      },
+
+      calculateAndDisplayTriangles: function () {
+        this.removeOldTexts();
+
+        const triangles = [
+          ['a', 'b', 'c'],
+          ['a', 'b', 'd'],
+          ['a', 'c', 'd'],
+          ['b', 'c', 'd']
+        ];
+
+        triangles.forEach(tri => {
+          if (tri.every(id => this.markerVisible[id])) {
+            const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
+            this.markers[tri[0]].object3D.getWorldPosition(A);
+            this.markers[tri[1]].object3D.getWorldPosition(B);
+            this.markers[tri[2]].object3D.getWorldPosition(C);
+
+            const a = B.distanceTo(C);
+            const b = A.distanceTo(C);
+            const c = A.distanceTo(B);
+            const perimeter = a + b + c;
+            const s = perimeter / 2;
+            const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+
+            // ➤ Выводим в консоль:
+            console.log(`Треугольник ${tri.join('-')}: P=${perimeter.toFixed(2)}, S=${area.toFixed(2)}`);
+
+            const center = {
+              x: (A.x + B.x + C.x) / 3,
+              y: (A.y + B.y + C.y) / 3 + 0.2,
+              z: (A.z + B.z + C.z) / 3
+            };
+
+            const textEl = document.createElement('a-text');
+            textEl.setAttribute('value', `P=${perimeter.toFixed(2)}\nS=${area.toFixed(2)}`);
+            textEl.setAttribute('position', center);
+            textEl.setAttribute('align', 'center');
+            textEl.setAttribute('scale', '0.5 0.5 0.5');
+            textEl.setAttribute('color', '#000');
+
+            document.querySelector('a-scene').appendChild(textEl);
+            this.triangleTexts.push(textEl);
+          }
+        });
+      },
+
+      tick: function () {
+        this.connections.forEach(pair => {
+          const id = pair.join('');
+          if (this.markerVisible[pair[0]] && this.markerVisible[pair[1]]) {
+            this.updateLinePosition(this.lines[id], this.markers[pair[0]], this.markers[pair[1]]);
+          }
+        });
+
+        this.calculateAndDisplayTriangles();
+      }
+    });
+  </script>
+</head>
+<body>
+  <a-scene 
+    mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 4;" 
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+    
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0" id="marker-a">
+      <a-sphere color="red" radius="0.1" position="0 0 0"></a-sphere>
+    </a-entity>
+
+    <a-entity mindar-image-target="targetIndex: 1" id="marker-b">
+      <a-sphere color="green" radius="0.1" position="0 0 0"></a-sphere>
+    </a-entity>
+
+    <a-entity mindar-image-target="targetIndex: 2" id="marker-c">
+      <a-sphere color="blue" radius="0.1" position="0 0 0"></a-sphere>
+    </a-entity>
+
+    <a-entity mindar-image-target="targetIndex: 3" id="marker-d">
+      <a-sphere color="yellow" radius="0.1" position="0 0 0"></a-sphere>
+    </a-entity>
+
+    <a-entity marker-network></a-entity>
+  </a-scene>
+</body>
+</html>
