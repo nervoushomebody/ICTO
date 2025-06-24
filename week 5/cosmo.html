@@ -1,146 +1,85 @@
 <!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindAR Project</title>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Solar System AR (MindAR)</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/aframe/mindar-image-aframe.prod.js"></script>
+    <script src="cosmo.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        h1 {
-            text-align: center;
-            color: #4a5568;
-            margin-bottom: 40px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .project-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-        }
-
-        .project-section:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .project-section h2 {
-            color: #4a5568;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            text-align: center;
-        }
-
-        .project-section p {
-            margin-bottom: 25px;
-            line-height: 1.6;
-            color: #666;
-            text-align: center;
-            display: none;
-        }
-
-        .project-link {
-            display: block;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-size: 1.1em;
-        }
-
-        .project-link:hover {
-            background: linear-gradient(45deg, #764ba2, #667eea);
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .marker-link {
-            display: block;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-size: 1.1em;
-        }
-
-        .marker-link:hover {
-            background: linear-gradient(45deg, #ee5a24, #ff6b6b);
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-        }
-
-        .icon {
-            font-size: 2em;
-            margin-bottom: 15px;
-            display: block;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-        }
+      body { margin: 0; overflow: hidden; }
+      #ar-container { width: 100vw; height: 100vh; position: relative; }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🧠 MindAR Project</h1>
+  </head>
+  <body>
+    <div id="ar-container">
+      <a-scene mindar-image="imageTargetSrc: targets.mind; autoStart: true;" embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: true">
         
-        <div class="project-section">
-            <div class="icon">🚀</div>
-            <h2>MindAR додаток</h2>
-            <p></p>
-            <a href="week 5/cosmo1.html" target="_blank" class="assignment-link">
-                        Переглянути завдання</a>
-        </div>
+        <a-assets>
+          <img id="sun" src="sun.jpg">
+          <img id="mercury" src="mercury.jpg">
+          <img id="venus" src="venus.jpg">
+          <img id="earth" src="earth.jpg">
+          <img id="mars" src="mars.jpg">
+          <img id="jupiter" src="jupiter.jpg">
+          <img id="saturn" src="saturn.jpg">
+          <img id="uranus" src="uranus.jpg">
+          <img id="neptune" src="neptune.jpg">
+        </a-assets>
 
-        <div class="project-section">
-            <div class="icon">🎯</div>
-            <h2>Цільовий маркер</h2>
-            <p>Завантажте це зображення для тестування AR функціональності</p>
-            <a href="https://github.com/nervoushomebody/ICTO/blob/main/week%205/targets.png" target="_blank" class="marker-link">Завантажити маркер</a>
-        </div>
+        <!-- Об'єкти будуть відображені при розпізнаванні 1-го маркера -->
+        <a-entity mindar-image-target="targetIndex: 0">
+
+          <!-- Сонце -->
+          <a-sphere src="#sun" radius="0.5" position="0 0 0"></a-sphere>
+          <a-text value="Sun" align="center" position="0 0.6 0" color="yellow" width="2"></a-text>
+
+          <!-- Планети -->
+          <a-entity planet="name: mercury; dist: 0.7; speed: 0.02">
+            <a-sphere src="#mercury" radius="0.05"></a-sphere>
+            <a-text value="Mercury" align="center" position="0 0.07 0" color="white" width="1.5"></a-text>
+          </a-entity>
+
+          <a-entity planet="name: venus; dist: 1; speed: 0.015">
+            <a-sphere src="#venus" radius="0.07"></a-sphere>
+            <a-text value="Venus" align="center" position="0 0.09 0" color="white" width="1.5"></a-text>
+          </a-entity>
+
+          <a-entity planet="name: earth; dist: 1.4; speed: 0.01">
+            <a-sphere src="#earth" radius="0.09"></a-sphere>
+            <a-text value="Earth" align="center" position="0 0.11 0" color="white" width="1.5"></a-text>
+          </a-entity>
+
+          <a-entity planet="name: mars; dist: 1.8; speed: 0.008">
+            <a-sphere src="#mars" radius="0.08"></a-sphere>
+            <a-text value="Mars" align="center" position="0 0.1 0" color="white" width="1.5"></a-text>
+          </a-entity>
+
+          <a-entity planet="name: jupiter; dist: 2.5; speed: 0.006">
+            <a-sphere src="#jupiter" radius="0.15"></a-sphere>
+            <a-text value="Jupiter" align="center" position="0 0.18 0" color="white" width="2"></a-text>
+          </a-entity>
+
+          <a-entity planet="name: saturn; dist: 3.2; speed: 0.005">
+            <a-sphere src="#saturn" radius="0.13"></a-sphere>
+            <a-ring color="#c2b280" radius-inner="0.15" radius-outer="0.22" rotation="-90 0 0" material="opacity:0.7"></a-ring>
+            <a-text value="Saturn" align="center" position="0 0.15 0" color="white" width="2"></a-text>
+          </a-entity>
+
+          <a-entity planet="name: uranus; dist: 3.8; speed: 0.004">
+            <a-sphere src="#uranus" radius="0.11"></a-sphere>
+            <a-text value="Uranus" align="center" position="0 0.13 0" color="white" width="1.5"></a-text>
+          </a-entity>
+
+          <a-entity planet="name: neptune; dist: 4.4; speed: 0.003">
+            <a-sphere src="#neptune" radius="0.1"></a-sphere>
+            <a-text value="Neptune" align="center" position="0 0.12 0" color="white" width="1.5"></a-text>
+          </a-entity>
+
+        </a-entity>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      </a-scene>
     </div>
-</body>
+  </body>
 </html>
