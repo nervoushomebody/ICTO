@@ -43,7 +43,7 @@
       createLine: function (idA, idB) {
         const line = document.createElement('a-cylinder');
         line.setAttribute('color', 'purple');
-        line.setAttribute('radius', '0.02');
+        line.setAttribute('radius', '0.05'); // товще лінії
         line.setAttribute('rotation', '90 0 0');
         document.querySelector('a-scene').appendChild(line);
         return line;
@@ -112,6 +112,9 @@
           ['b', 'c', 'd']
         ];
 
+        let totalTriangleText = '';
+        let totalArea = 0;
+
         triangles.forEach(tri => {
           if (tri.every(id => this.markerVisible[id])) {
             const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
@@ -126,25 +129,46 @@
             const s = perimeter / 2;
             const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
 
-            console.log(`Треугольник ${tri.join('-')}: P=${perimeter.toFixed(2)}, S=${area.toFixed(2)}`);
+            totalArea += area;
 
-            const center = {
-              x: (A.x + B.x + C.x) / 3,
-              y: (A.y + B.y + C.y) / 3 + 0.2,
-              z: (A.z + B.z + C.z) / 3
-            };
-
-            const textEl = document.createElement('a-text');
-            textEl.setAttribute('value', `P=${perimeter.toFixed(2)}\nS=${area.toFixed(2)}`);
-            textEl.setAttribute('position', center);
-            textEl.setAttribute('align', 'center');
-            textEl.setAttribute('scale', '0.5 0.5 0.5');
-            textEl.setAttribute('color', '#000');
-
-            document.querySelector('a-scene').appendChild(textEl);
-            this.triangleTexts.push(textEl);
+            totalTriangleText += `Δ${tri.join('')}: P=${perimeter.toFixed(2)} S=${area.toFixed(2)}\n`;
           }
         });
+
+        if (['a', 'b', 'c', 'd'].every(id => this.markerVisible[id])) {
+          const A = new THREE.Vector3(), B = new THREE.Vector3(),
+                C = new THREE.Vector3(), D = new THREE.Vector3();
+          this.markers['a'].object3D.getWorldPosition(A);
+          this.markers['b'].object3D.getWorldPosition(B);
+          this.markers['c'].object3D.getWorldPosition(C);
+          this.markers['d'].object3D.getWorldPosition(D);
+
+          const ab = A.distanceTo(B);
+          const bc = B.distanceTo(C);
+          const cd = C.distanceTo(D);
+          const da = D.distanceTo(A);
+
+          const quadPerimeter = ab + bc + cd + da;
+
+          totalTriangleText += `Чотирикутник: P=${quadPerimeter.toFixed(2)}\n`;
+          totalTriangleText += `Загальна площа: ${totalArea.toFixed(2)}\n`;
+
+          const center = {
+            x: (A.x + B.x + C.x + D.x) / 4,
+            y: (A.y + B.y + C.y + D.y) / 4 + 0.3,
+            z: (A.z + B.z + C.z + D.z) / 4
+          };
+
+          const textEl = document.createElement('a-text');
+          textEl.setAttribute('value', totalTriangleText.trim());
+          textEl.setAttribute('position', center);
+          textEl.setAttribute('align', 'center');
+          textEl.setAttribute('scale', '0.5 0.5 0.5');
+          textEl.setAttribute('color', '#111');
+
+          document.querySelector('a-scene').appendChild(textEl);
+          this.triangleTexts.push(textEl);
+        }
       },
 
       tick: function () {
