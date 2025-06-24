@@ -1,143 +1,173 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <title>MindAR: Two Markers - Model & Video</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-three.prod.js"></script>
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
-        "GLTFLoader": "https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js"
-      }
+  <meta charset="UTF-8" />
+  <title>MindAR: Модель + Відео</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-three.prod.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+      "GLTFLoader": "https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js"
     }
-    </script>
-    <style>
-        body {
-            margin: 0; overflow: hidden;
-            width: 100vw; height: 100vh;
-        }
-        #loading, #status {
-            position: absolute;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 15px;
-            font-family: monospace;
-            border-radius: 10px;
-        }
-        #loading {
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        #status {
-            bottom: 10px; left: 10px; /* переміщено вниз */
-        }
-        .marker-status {
-            margin-top: 5px;
-            padding: 5px;
-            border-radius: 5px;
-        }
-        .marker-active { background-color: rgba(0,255,0,0.2); }
-        .marker-inactive { background-color: rgba(255,0,0,0.2); }
-    </style>
+  }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      font-family: sans-serif;
+      z-index: 10;
+      text-align: center;
+    }
+
+    #status {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(20, 20, 20, 0.85);
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #f0f0f0;
+      max-width: 340px;
+      transition: opacity 0.3s ease-in-out;
+      z-index: 10;
+    }
+
+    .marker-status {
+      margin-top: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    .marker-active {
+      background-color: rgba(0, 200, 0, 0.25);
+    }
+
+    .marker-inactive {
+      background-color: rgba(200, 0, 0, 0.25);
+    }
+  </style>
 </head>
 <body>
-    <div id="loading">🔄 Завантаження AR системи...</div>
-    <div id="status">
-        <div id="main-status">Статус: Ініціалізація...</div>
-        <div id="marker1-status" class="marker-status marker-inactive">Маркер 1 (model.glb): НЕ НАЙДЕН</div>
-        <div id="marker2-status" class="marker-status marker-inactive">Маркер 2 (video.mp4): НЕ НАЙДЕН</div>
-    </div>
+  <div id="loading">🔄 Завантаження AR-системи...<br>Дозвольте доступ до камери</div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'GLTFLoader';
+  <div id="status">
+    <div id="main-status">Статус: Ініціалізація...</div>
+    <div id="marker1-status" class="marker-status marker-inactive">🔴 Маркер 1 (model.glb): НЕ ЗНАЙДЕНО</div>
+    <div id="marker2-status" class="marker-status marker-inactive">🔴 Маркер 2 (video.mp4): НЕ ЗНАЙДЕНО</div>
+  </div>
 
-        const updateMainStatus = (msg) => document.getElementById("main-status").textContent = `Статус: ${msg}`;
-        const updateMarkerStatus = (num, found) => {
-            const el = document.getElementById(`marker${num}-status`);
-            el.textContent = `Маркер ${num} (${num === 1 ? 'model.glb' : 'video.mp4'}): ${found ? 'НАЙДЕН' : 'НЕ НАЙДЕН'}`;
-            el.className = `marker-status ${found ? 'marker-active' : 'marker-inactive'}`;
-        };
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'GLTFLoader';
 
-        window.addEventListener("DOMContentLoaded", async () => {
-            const { MindARThree } = window.MINDAR.IMAGE;
+    const updateMainStatus = (msg) => {
+      document.getElementById("main-status").textContent = `Статус: ${msg}`;
+    };
 
-            const mindarThree1 = new MindARThree({
-                container: document.body,
-                imageTargetSrc: './marker1.mind'
-            });
-            const mindarThree2 = new MindARThree({
-                container: document.body,
-                imageTargetSrc: './marker2.mind'
-            });
+    const updateMarkerStatus = (num, found) => {
+      const el = document.getElementById(`marker${num}-status`);
+      const label = num === 1 ? 'model.glb' : 'video.mp4';
+      const icon = found ? '🟢' : '🔴';
+      const status = found ? 'ЗНАЙДЕНО' : 'НЕ ЗНАЙДЕНО';
+      el.textContent = `${icon} Маркер ${num} (${label}): ${status}`;
+      el.className = `marker-status ${found ? 'marker-active' : 'marker-inactive'}`;
+    };
 
-            const { renderer, scene, camera } = mindarThree1;
-            mindarThree2.renderer = renderer;
-            mindarThree2.scene = scene;
-            mindarThree2.camera = camera;
+    window.addEventListener("DOMContentLoaded", async () => {
+      const { MindARThree } = window.MINDAR.IMAGE;
 
-            // LIGHT
-            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(1, 1, 1);
-            scene.add(dirLight);
+      const mindarThree1 = new MindARThree({
+        container: document.body,
+        imageTargetSrc: './marker1.mind'
+      });
+      const mindarThree2 = new MindARThree({
+        container: document.body,
+        imageTargetSrc: './marker2.mind'
+      });
 
-            // === 1: 3D MODEL ===
-            const anchor1 = mindarThree1.addAnchor(0);
-            const loader = new GLTFLoader();
-            loader.load('./model.glb', (gltf) => {
-                const model = gltf.scene;
-                model.scale.set(0.1, 0.1, 0.1);
-                model.position.set(0, -0.5, 0);
-                model.userData.rotationSpeed = 0.01;
-                anchor1.group.add(model);
-            });
+      const { renderer, scene, camera } = mindarThree1;
+      mindarThree2.renderer = renderer;
+      mindarThree2.scene = scene;
+      mindarThree2.camera = camera;
 
-            anchor1.onTargetFound = () => updateMarkerStatus(1, true);
-            anchor1.onTargetLost = () => updateMarkerStatus(1, false);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const light = new THREE.DirectionalLight(0xffffff, 0.8);
+      light.position.set(1, 1, 1);
+      scene.add(light);
 
-            // === 2: VIDEO ===
-            const anchor2 = mindarThree2.addAnchor(0);
-            const video = document.createElement('video');
-            video.src = './video.mp4';
-            video.loop = true;
-            video.muted = true;
-            video.playsInline = true;
-            video.crossOrigin = 'anonymous';
+      // === Маркер 1: 3D модель ===
+      const anchor1 = mindarThree1.addAnchor(0);
+      const loader = new GLTFLoader();
+      loader.load('./model.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(0.1, 0.1, 0.1);
+        model.position.set(0, -0.5, 0);
+        model.userData.rotationSpeed = 0.01;
+        anchor1.group.add(model);
+      });
+      anchor1.onTargetFound = () => updateMarkerStatus(1, true);
+      anchor1.onTargetLost = () => updateMarkerStatus(1, false);
 
-            const videoTexture = new THREE.VideoTexture(video);
-            const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture, side: THREE.DoubleSide });
-            const videoMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.7), videoMaterial);
-            anchor2.group.add(videoMesh);
+      // === Маркер 2: Відео ===
+      const anchor2 = mindarThree2.addAnchor(0);
+      const video = document.createElement('video');
+      video.src = './video.mp4';
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.crossOrigin = 'anonymous';
 
-            anchor2.onTargetFound = () => {
-                updateMarkerStatus(2, true);
-                video.play();
-            };
-            anchor2.onTargetLost = () => {
-                updateMarkerStatus(2, false);
-                video.pause();
-            };
+      const videoTexture = new THREE.VideoTexture(video);
+      const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture, side: THREE.DoubleSide });
+      const videoMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.7), videoMaterial);
+      anchor2.group.add(videoMesh);
 
-            // === START ALL ===
-            updateMainStatus("Запуск...");
-            await mindarThree1.start();
-            await mindarThree2.start();
-            updateMainStatus("✅ Готово! Наведіть на маркери.");
-            document.getElementById("loading").style.display = "none";
+      anchor2.onTargetFound = () => {
+        updateMarkerStatus(2, true);
+        video.play();
+      };
+      anchor2.onTargetLost = () => {
+        updateMarkerStatus(2, false);
+        video.pause();
+      };
 
-            renderer.setAnimationLoop(() => {
-                anchor1.group.children.forEach(child => {
-                    if (child.userData?.rotationSpeed) {
-                        child.rotation.y += child.userData.rotationSpeed;
-                    }
-                });
-                renderer.render(scene, camera);
-            });
+      // === Запуск систем ===
+      updateMainStatus("Запуск...");
+      await mindarThree1.start();
+      await mindarThree2.start();
+      updateMainStatus("✅ Готово! Наведіть камеру на маркери.");
+      document.getElementById("loading").style.display = "none";
+
+      renderer.setAnimationLoop(() => {
+        anchor1.group.children.forEach(child => {
+          if (child.userData?.rotationSpeed) {
+            child.rotation.y += child.userData.rotationSpeed;
+          }
         });
-    </script>
+        renderer.render(scene, camera);
+      });
+    });
+  </script>
 </body>
 </html>
