@@ -1,80 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <title>MindAR: Два окремих маркери</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-three.prod.js"></script>
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
-                "GLTFLoader": "https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js"
-            }
-        }
-    </script>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
+  <meta charset="UTF-8" />
+  <title>MindAR: Два маркери</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-three.prod.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+        "GLTFLoader": "https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js"
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
 
-        #loading {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: white;
-            font-size: 16px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        #status {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            font-size: 14px;
-            z-index: 99;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 5px;
-            max-width: 350px;
-            font-family: monospace;
-        }
-
-        .marker-status {
-            margin: 5px 0;
-            padding: 5px;
-            border-radius: 3px;
-        }
-
-        .marker-active {
-            background-color: rgba(0, 255, 0, 0.2);
-        }
-
-        .marker-inactive {
-            background-color: rgba(255, 0, 0, 0.2);
-        }
-    </style>
+    #status {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: sans-serif;
+      font-size: 14px;
+      z-index: 10;
+    }
+  </style>
 </head>
 <body>
-    <div id="loading">Завантаження AR системи...</div>
+  <div id="status">Ініціалізація...</div>
 
-    <div id="status">
-        <div id="main-status">Статус: Ініціалізація...</div>
-        <div id="marker1-status" class="marker-status marker-inactive">Маркер 1 (marker.mind): 3D модель – НЕ ЗНАЙДЕНО</div>
-        <div id="marker2-status" class="marker-status marker-inactive">Маркер 2 (marker2.mind): Відео – НЕ ЗНАЙДЕНО</div>
-    </div>
+  <script type="module">
+    import * as THREE from "three";
+    import { GLTFLoader } from "GLTFLoader";
 
-    <!-- решта JS-коду підключається нижче -->
+    const statusEl = document.getElementById("status");
+
+    const { MindARThree } = window.MINDAR.IMAGE;
+    const mindarThree = new MindARThree({
+      container: document.body,
+      imageTargetSrc: "./marker.mind", // Головний marker
+      maxTrack: 2, // Дозволити два одночасних маркери
+    });
+
+    const { renderer, scene, camera } = mindarThree;
+
+    // Світло
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1));
+
+    // ===== МАРКЕР 1 — 3D МОДЕЛЬ =====
+    const anchor1 = mindarThree.addAnchor(0); // marker.mind
+    const loader = new GLTFLoader();
+    loader.load(
+      "https://raw.githubusercontent.com/hiukim/mind-ar-js/master/examples/image-tracking/assets/band-example/raccoon/scene.gltf",
+      (gltf) => {
+        gltf.scene.scale.set(0.1, 0.1, 0.1);
+        gltf.scene.position.set(0, -0.4, 0);
+        anchor1.group.add(gltf.scene);
+      }
+    );
+
+    anchor1.onTargetFound = () => {
+      statusEl.textContent = "✅ Маркер 1 (3D модель) знайдено";
+    };
+    anchor1.onTargetLost = () => {
+      statusEl.textContent = "🔍 Маркер 1 втрачено";
+    };
+
+    // ===== МАРКЕР 2 — ВІДЕО =====
+    const anchor2 = mindarThree.addAnchor(1); // marker2.mind
+
+    const video = document.createElement("video");
+    video.src = "./video.mp4"; // або абсолютний шлях
+    video.crossOrigin = "anonymous";
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+
+    const videoTexture = new THREE.VideoTexture(video);
+    const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.6), videoMaterial);
+    plane.position.set(0, 0, 0);
+    anchor2.group.add(plane);
+
+    anchor2.onTargetFound = () => {
+      statusEl.textContent = "✅ Маркер 2 (відео) знайдено";
+      video.play();
+    };
+    anchor2.onTargetLost = () => {
+      statusEl.textContent = "🔍 Маркер 2 втрачено";
+      video.pause();
+    };
+
+    // ======= СТАРТ =======
+    const start = async () => {
+      await mindarThree.start();
+      renderer.setAnimationLoop(() => {
+        renderer.render(scene, camera);
+      });
+      statusEl.textContent = "🔍 Наведіть камеру на маркери";
+    };
+
+    start();
+  </script>
 </body>
 </html>
