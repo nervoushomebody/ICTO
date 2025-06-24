@@ -1,41 +1,189 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>MindAR AR Demo (week 9)</title>
-    <script src="./aframe.min.js"></script>
-    <script src="./mindar-image.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.loaders.min.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; }
-    </style>
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <title>MindAR Two Separate Markers (Week 9)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-three.prod.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+        "GLTFLoader": "https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js"
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
 
-  <body>
-    <a-scene mindar-image="imageTargetSrc: marker1.mind, marker2.mind;"
-             color-space="sRGB"
-             embedded
-             vr-mode-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false">
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 18px;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
 
-      <a-assets>
-        <video id="video1" src="videomp4" preload="auto" loop crossorigin="anonymous"></video>
-        <a-asset-item id="model1" src="model.glb"></a-asset-item>
-      </a-assets>
+    #status {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      font-size: 14px;
+      z-index: 99;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 350px;
+      font-family: monospace;
+    }
 
-      <!-- Камера -->
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    .marker-status {
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 3px;
+    }
 
-      <!-- Перший маркер з відео -->
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-video src="#video1" width="1" height="0.6" position="0 0 0"></a-video>
-      </a-entity>
+    .marker-active {
+      background-color: rgba(0, 255, 0, 0.2);
+    }
 
-      <!-- Другий маркер з 3D-моделлю -->
-      <a-entity mindar-image-target="targetIndex: 1">
-        <a-gltf-model src="#model1" position="0 -0.5 0" rotation="0 180 0" scale="0.5 0.5 0.5"></a-gltf-model>
-      </a-entity>
+    .marker-inactive {
+      background-color: rgba(255, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div>Завантаження AR системи...</div>
+    <div style="font-size: 14px; margin-top: 10px;">Надайте доступ до камери</div>
+  </div>
 
-    </a-scene>
-  </body>
+  <div id="status">
+    <div id="main-status">Статус: Ініціалізація...</div>
+    <div id="marker1-status" class="marker-status marker-inactive">Маркер 1 (marker1.mind): 3D модель - НЕ НАЙДЕНО</div>
+    <div id="marker2-status" class="marker-status marker-inactive">Маркер 2 (marker2.mind): Відео - НЕ НАЙДЕНО</div>
+    <div style="font-size: 12px; margin-top: 10px;">Наведіть камеру на маркери</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from "three";
+    import { GLTFLoader } from "GLTFLoader";
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      const { MindARThree } = window.MINDAR.IMAGE;
+
+      const updateMainStatus = (msg) => document.getElementById("main-status").textContent = "Статус: " + msg;
+
+      const updateMarkerStatus = (num, found) => {
+        const el = document.getElementById(`marker${num}-status`);
+        el.textContent = `Маркер ${num} (marker${num}.mind): ${num === 1 ? "3D модель" : "Відео"} - ${found ? "НАЙДЕНО" : "НЕ НАЙДЕНО"}`;
+        el.className = `marker-status ${found ? "marker-active" : "marker-inactive"}`;
+      };
+
+      let mind1 = new MindARThree({ container: document.body, imageTargetSrc: "./marker1.mind" });
+      let { renderer, scene, camera } = mind1;
+
+      // Освітлення
+      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(1, 1, 1);
+      scene.add(dirLight);
+
+      // === МАРКЕР 1 (3D МОДЕЛЬ) ===
+      updateMainStatus("Завантаження маркера 1...");
+      const anchor1 = mind1.addAnchor(0);
+
+      const loader = new GLTFLoader();
+      loader.load("./model.glb", (gltf) => {
+        gltf.scene.scale.set(0.5, 0.5, 0.5);
+        gltf.scene.position.set(0, -0.5, 0);
+        gltf.scene.userData.rotationSpeed = 0.01;
+        anchor1.group.add(gltf.scene);
+      });
+
+      anchor1.onTargetFound = () => updateMarkerStatus(1, true);
+      anchor1.onTargetLost = () => updateMarkerStatus(1, false);
+
+      // === МАРКЕР 2 (ВІДЕО) ===
+      updateMainStatus("Завантаження маркера 2...");
+      const mind2 = new MindARThree({ container: document.body, imageTargetSrc: "./marker2.mind" });
+      mind2.renderer = renderer;
+      mind2.scene = scene;
+      mind2.camera = camera;
+
+      const anchor2 = mind2.addAnchor(0);
+
+      const video = document.createElement("video");
+      video.src = "./videomp4";
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      video.crossOrigin = "anonymous";
+
+      const videoTexture = new THREE.VideoTexture(video);
+      const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture, side: THREE.DoubleSide });
+      const videoGeometry = new THREE.PlaneGeometry(1, 0.6);
+      const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+      videoMesh.position.set(0, 0, 0.1);
+
+      const indicator = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.2, 0.8),
+        new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 })
+      );
+      indicator.position.set(0, 0, 0.05);
+
+      anchor2.group.add(indicator);
+      anchor2.group.add(videoMesh);
+
+      anchor2.onTargetFound = () => {
+        updateMarkerStatus(2, true);
+        indicator.material.color.set(0x00ff00);
+        video.play();
+      };
+      anchor2.onTargetLost = () => {
+        updateMarkerStatus(2, false);
+        indicator.material.color.set(0xff0000);
+        video.pause();
+      };
+
+      // === СТАРТ СЦЕНИ ===
+      updateMainStatus("Запуск MindAR...");
+      await mind1.start();
+      await mind2.start();
+
+      updateMainStatus("✅ Система готова!");
+
+      renderer.setAnimationLoop(() => {
+        anchor1.group.children.forEach(obj => {
+          if (obj.userData.rotationSpeed) {
+            obj.rotation.y += obj.userData.rotationSpeed;
+          }
+        });
+        renderer.render(scene, camera);
+      });
+
+      // Приховати завантаження
+      setTimeout(() => {
+        const loading = document.getElementById("loading");
+        if (loading) loading.style.display = "none";
+      }, 3000);
+    });
+  </script>
+</body>
 </html>
