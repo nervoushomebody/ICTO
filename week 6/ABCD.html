@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
@@ -42,11 +42,9 @@
 
       createLine: function (idA, idB) {
         const line = document.createElement('a-cylinder');
-
-        line.setAttribute('color', (['ab', 'bc', 'cd', 'da'].includes(idA + idB) || ['ab', 'bc', 'cd', 'da'].includes(idB + idA)) ? 'red' : 'blue');
-        line.setAttribute('radius', '2.5'); // сделаем линии толще
+        line.setAttribute('color', 'purple');
+        line.setAttribute('radius', '0.02');
         line.setAttribute('rotation', '90 0 0');
-
         document.querySelector('a-scene').appendChild(line);
         return line;
       },
@@ -128,7 +126,6 @@
             const s = perimeter / 2;
             const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
 
-            // ➤ Выводим в консоль:
             console.log(`Треугольник ${tri.join('-')}: P=${perimeter.toFixed(2)}, S=${area.toFixed(2)}`);
 
             const center = {
@@ -168,23 +165,23 @@
     mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 4;" 
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
-    
+
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <a-entity mindar-image-target="targetIndex: 0" id="marker-a">
-      <a-sphere color="red" radius="0.1" position="0 0 0"></a-sphere>
+      <a-cylinder color="purple" radius="0.05" height="0.2" position="0 0 0"></a-cylinder>
     </a-entity>
 
     <a-entity mindar-image-target="targetIndex: 1" id="marker-b">
-      <a-sphere color="green" radius="0.1" position="0 0 0"></a-sphere>
+      <a-cylinder color="purple" radius="0.05" height="0.2" position="0 0 0"></a-cylinder>
     </a-entity>
 
     <a-entity mindar-image-target="targetIndex: 2" id="marker-c">
-      <a-sphere color="blue" radius="0.1" position="0 0 0"></a-sphere>
+      <a-cylinder color="purple" radius="0.05" height="0.2" position="0 0 0"></a-cylinder>
     </a-entity>
 
     <a-entity mindar-image-target="targetIndex: 3" id="marker-d">
-      <a-sphere color="yellow" radius="0.1" position="0 0 0"></a-sphere>
+      <a-cylinder color="purple" radius="0.05" height="0.2" position="0 0 0"></a-cylinder>
     </a-entity>
 
     <a-entity marker-network></a-entity>
