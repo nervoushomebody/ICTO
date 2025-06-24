@@ -5,27 +5,27 @@ const planets = []; // масив планет
 AFRAME.registerComponent('planet', {
   schema: {
     name: { type: 'string' },
-    mass: { type: 'number' },
-    year: { type: 'number' },
-    dist: { type: 'number' } // відстань до Сонця в метрах
-    dist: { type: 'number' },
-    speed: { type: 'number' }Add commentMore actions
+    mass: { type: 'number', default: 1e24 },
+    year: { type: 'number', default: 1 },
+    dist: { type: 'number' }, // у метрах
+    speed: { type: 'number' }
   },
 
   init: function () {
-    // Початкова позиція: переведення у мільйони км (1e9 м = 1м у сцені)
     this.angle = Math.random() * Math.PI * 2;
+
+    const distScaled = this.data.dist / 1e9; // переведення в "сценові" метри (1м = 1млн км)
+
     this.el.setAttribute('position', {
-      x: this.data.dist / 1e9,
-      x: this.data.dist,
+      x: distScaled * Math.cos(this.angle),
       y: 0,
-      z: 0
+      z: distScaled * Math.sin(this.angle)
     });
 
-    // Початкова швидкість (по орбіті, перпендикулярна до напрямку на Сонце)
+    // Початкова швидкість
     this.v = [0, 0, Math.sqrt(G * SUN_MASS / this.data.dist)];
 
-    // Додати до глобального масиву планет
+    // Додати в глобальний масив
     planets.push({
       el: this.el,
       name: this.data.name,
@@ -39,7 +39,7 @@ AFRAME.registerComponent('planet', {
   },
 
   tick: function (time, timeDelta) {
-    const dt = 86400 / 3; // крок інтегрування ~ 8 годин (у секундах)
+    const dt = 86400 / 3; // 8 год у секундах
 
     // Розрахунок прискорення
     for (let i = 0; i < planets.length; i++) {
@@ -54,9 +54,8 @@ AFRAME.registerComponent('planet', {
           ];
 
           let dist = Math.sqrt(r[0] ** 2 + r[1] ** 2 + r[2] ** 2);
-          if (dist === 0) continue; // запобігання діленню на 0
+          if (dist === 0) continue;
 
-          // Гравітаційне прискорення за законом Ньютона
           for (let k = 0; k < 3; k++) {
             planets[i].a[k] += G * planets[j].mass * r[k] / Math.pow(dist, 3);
           }
@@ -64,23 +63,18 @@ AFRAME.registerComponent('planet', {
       }
     }
 
-    // Оновлення швидкості та положення
+    // Оновлення швидкостей і положень
     for (let i = 0; i < planets.length; i++) {
       for (let k = 0; k < 3; k++) {
         planets[i].v[k] += planets[i].a[k] * dt;
         planets[i].pos[k] += planets[i].v[k] * dt;
       }
 
-      // Оновлення положення A-Frame entity (в мільйонах км)
       planets[i].el.setAttribute('position', {
         x: planets[i].pos[0] / 1e9,
         y: planets[i].pos[1] / 1e9,
         z: planets[i].pos[2] / 1e9
       });
     }
-    this.angle += this.data.speed;
-    let x = this.data.dist * Math.cos(this.angle);
-    let z = this.data.dist * Math.sin(this.angle);
-    this.el.setAttribute('position', { x: x, y: 0, z: z });
   }
 });
