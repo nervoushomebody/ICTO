@@ -39,6 +39,16 @@
       font-size: 14px;
     }
   </style>
+
+  <!-- 🔧 Важливо: Import map для ES-модулів -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.176.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.176.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
   <div id="container"></div>
@@ -47,10 +57,10 @@
     Натисніть "Start AR" та торкніться екрана для розміщення макета.
   </div>
 
-  <!-- Cannon.js (опціонально, якщо не використовується, можна видалити) -->
+  <!-- 🧠 Cannon.js (опціонально, якщо не використовується — можна видалити) -->
   <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.min.js"></script>
 
-  <!-- Основний скрипт -->
+  <!-- 🚀 Основний модуль -->
   <script type="module" src="./main.js"></script>
 </body>
 </html>
