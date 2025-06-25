@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>AR Піраміди Гізи - WebXR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+    }
+
+    #container {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #ar-button {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 5;
+      color: white;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="info">
+    <strong>AR Піраміди</strong><br>
+    Натисніть "Start AR" та торкніться екрана для розміщення макета.
+  </div>
+
+  <!-- Cannon.js (опціонально, якщо не використовується, можна видалити) -->
+  <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.min.js"></script>
+
+  <!-- Основний скрипт -->
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
