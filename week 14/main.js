@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CONTENT GROUP ---
     const contentGroup = new THREE.Group();
     contentGroup.visible = false;
-    contentGroup.scale.set(0.05, 0.05, 0.05); // ЗМЕНШЕНО масштаб
+    contentGroup.scale.set(0.01, 0.01, 0.01); // ЗМЕНШЕНО масштаб
 
     // --- GROUND PLANE (optional visual reference) ---
     const floorGeometry = new THREE.PlaneGeometry(20, 20);
