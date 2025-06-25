@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>AR Pyramids of Giza (Full Scale)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        .example-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+    <script>
+        // Smoothing component (as provided in your original code)
+        AFRAME.registerComponent('smoothing', {
+            schema: {
+                smoothing: { type: 'number', default: 0.8 },
+                movementThreshold: { type: 'number', default: 0.003 },
+                rotationThreshold: { type: 'number', default: 0.1 }
+            },
+            init: function () {
+                this.visibleStarted = false;
+                this.lastPosition = new THREE.Vector3();
+                this.lastQuaternion = new THREE.Quaternion();
+                this.targetPosition = new THREE.Vector3();
+                this.targetQuaternion = new THREE.Quaternion();
+                this.el.addEventListener('targetFound', () => {
+                    this.visibleStarted = true;
+                    this.lastPosition.copy(this.el.object3D.position);
+                    this.lastQuaternion.copy(this.el.object3D.quaternion);
+                });
+                this.el.addEventListener('targetLost', () => {
+                    this.visibleStarted = false;
+                });
+            },
+            tick: function () {
+                if (!this.visibleStarted) return;
+                this.targetPosition.copy(this.el.object3D.position);
+                this.targetQuaternion.copy(this.el.object3D.quaternion);
+                const movementDistance = this.lastPosition.distanceTo(this.targetPosition);
+                const rotationDiff = Math.abs(this.lastQuaternion.angleTo(this.targetQuaternion) * 180 / Math.PI);
+                const isMoving = movementDistance > this.data.movementThreshold;
+                const isRotating = rotationDiff > this.data.rotationThreshold;
+                if (!isMoving && !isRotating) return;
+                this.el.object3D.position.lerp(this.lastPosition, this.data.smoothing);
+                this.el.object3D.quaternion.slerp(this.lastQuaternion, this.data.smoothing);
+                if (isMoving) this.lastPosition.lerp(this.targetPosition, 1 - this.data.smoothing);
+                if (isRotating) this.lastQuaternion.slerp(this.targetQuaternion, 1 - this.data.smoothing);
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div class="example-container">
+        <a-scene 
+            mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1; uiScanning: yes;" 
+            embedded 
+            color-space="sRGB"
+            renderer="colorManagement: true; physicallyCorrectLights: true;"
+            vr-mode-ui="enabled: false" 
+            device-orientation-permission-ui="enabled: false">
+            
+            <a-assets>
+                <img id="brick_bump" src="./brick_bump.jpg">
+                <img id="brick_diffuse" src="./brick_diffuse.jpg">
+                <img id="brick_roughness" src="./brick_roughness.jpg">
+            </a-assets>
+
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+            <a-entity mindar-image-target="targetIndex: 0" smoothing>
+
+                <a-entity position="0 0 0" scale="1 1 1" rotation="0 0 0">
+                    
+                    <a-light type="ambient" color="#888"></a-light>
+                    <a-light type="directional" position="1 3 2" intensity="0.8"></a-light>
+
+                    <a-entity position="-0.5 0 -0.5">
+                        <a-cone 
+                            height="0.58" 
+                            radius-bottom="0.65" 
+                            segments-radial="4" 
+                            material="src: #brick_bump; normalMap: #brick_bump;"
+                            position="0 0.29 0"
+                            rotation="0 45 0">
+                        </a-cone>
+                        <a-cone 
+                            height="0.04" 
+                            radius-bottom="0.08" 
+                            segments-radial="4" 
+                            material="color: gold; metalness: 0.8; roughness: 0.2;"
+                            position="0 0.58 0"
+                            rotation="0 45 0">
+                        </a-cone>
+                    </a-entity>
+
+                    <a-entity position="0 0 0">
+                        <a-cone 
+                            height="0.54" 
+                            radius-bottom="0.59" 
+                            segments-radial="4" 
+                            material="src: #brick_diffuse"
+                            position="0 0.27 0"
+                            rotation="0 45 0">
+                        </a-cone>
+                        <a-cone 
+                            height="0.04" 
+                            radius-bottom="0.07" 
+                            segments-radial="4" 
+                            material="color: gold; metalness: 0.8; roughness: 0.2;"
+                            position="0 0.54 0"
+                            rotation="0 45 0">
+                        </a-cone>
+                    </a-entity>
+
+                    <a-entity position="0.5 0 0.5">
+                        <a-cone 
+                            height="0.26" 
+                            radius-bottom="0.28" 
+                            segments-radial="4" 
+                            material="src: #brick_roughness; roughnessMap: #brick_roughness;"
+                            position="0 0.13 0"
+                            rotation="0 45 0">
+                        </a-cone>
+                        <a-cone 
+                            height="0.02" 
+                            radius-bottom="0.04" 
+                            segments-radial="4" 
+                            material="color: gold; metalness: 0.8; roughness: 0.2;"
+                            position="0 0.26 0"
+                            rotation="0 45 0">
+                        </a-cone>
+                    </a-entity>
+
+                </a-entity>
+            </a-entity>
+        </a-scene>
+    </div>
+</body>
+</html>
